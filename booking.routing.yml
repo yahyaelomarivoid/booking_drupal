@@ -1,0 +1,77 @@
+# Client: Booking form
+booking.rdv:
+  path: "/prendre-un-rdv"
+  defaults:
+    _form: '\Drupal\booking\Form\BookingSubmitForm'
+    _title: "Prendre un rendez-vous"
+  requirements:
+    _permission: "access content"
+
+# Client: Booking step
+booking.rdv.step:
+  path: "/prendre-un-rdv/{step}"
+  defaults:
+    _form: '\Drupal\booking\Form\BookingSubmitForm'
+    _title: "Prendre un rendez-vous"
+    step: 1
+  requirements:
+    _permission: "access content"
+    step: \d+
+
+# Client: Manage booking by reference
+booking.mes-rdv:
+  path: "/mes-rdv"
+  defaults:
+    _form: '\Drupal\booking\Form\BookingEditForm'
+    _title: "Gérer mon rendez-vous"
+  requirements:
+    _permission: "access content"
+
+# Admin: collection list
+entity.booking.collection:
+  path: "/admin/structure/booking"
+  defaults:
+    _entity_list: "booking"
+    _title: "Booking List"
+  requirements:
+    _permission: "access content"
+
+# Admin: canonical/detail view
+entity.booking.canonical:
+  path: "/admin/structure/booking/{booking}"
+  defaults:
+    _entity_view: "booking"
+    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+  requirements:
+    _permission: "access content"
+    booking: \d+
+
+# Admin: full entity edit form
+entity.booking.edit_form:
+  path: "/admin/structure/booking/{booking}/edit"
+  defaults:
+    _entity_form: "booking.default"
+    _title: "Edit Booking"
+  requirements:
+    _permission: "access content"
+    booking: \d+
+
+# Admin: status-only form
+entity.booking.status_form:
+  path: "/admin/structure/booking/{booking}/status"
+  defaults:
+    _entity_form: "booking.status"
+    _title: "Update Booking Status"
+  requirements:
+    _permission: "access content"
+    booking: \d+
+
+# Admin: delete confirmation form
+entity.booking.delete_form:
+  path: "/admin/structure/booking/{booking}/delete"
+  defaults:
+    _entity_form: "booking.delete"
+    _title: "Delete Booking"
+  requirements:
+    _permission: "access content"
+    booking: \d+

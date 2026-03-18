@@ -1,0 +1,6 @@
+entity.booking.collection:
+  title: 'Bookings'
+  description: 'Manage the list of bookings.'
+  parent: system.admin_structure
+  route_name: entity.booking.collection
+  weight: 20

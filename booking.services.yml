@@ -1,0 +1,5 @@
+services:
+  booking.service:
+    class: Drupal\booking\BookingService
+    arguments: ['@entity_type.manager', '@logger.factory', '@messenger']
+

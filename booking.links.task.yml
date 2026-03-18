@@ -1,0 +1,5 @@
+booking.view:
+  title: "Appointments"
+  route_name: entity.booking.collection
+  base_route: entity.booking.collection
+  weight: 10
