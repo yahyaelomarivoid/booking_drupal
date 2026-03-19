@@ -51,7 +51,11 @@ trait BookingFormTrait
   {
     try {
       $stored = $form_state->get('stored_values') ?: [];
-      $options = $this->bookingService->getAdviserRichOptions();
+      $agencyId = $stored['agency_options'] ?? NULL;
+      $options = $this->bookingService->getAdviserRichOptions($agencyId);
+      if (empty($options)) {
+        $this->messenger()->addWarning($this->t('No advisers available for the selected agency.'));
+      }
       $form['adviser_options'] = [
         '#type' => 'radios',
         '#title' => $this->t('Select an adviser'),

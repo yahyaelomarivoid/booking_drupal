@@ -173,10 +173,14 @@ class BookingService
   /**
    * Gets adviser options.
    */
-  public function getAdviserOptions(): array
+  public function getAdviserOptions($agencyId = NULL): array
   {
     try {
-      $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['status' => 1]);
+      $properties = ['status' => 1];
+      if ($agencyId) {
+        $properties['field_agency'] = $agencyId;
+      }
+      $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
       $options = [];
       foreach ($users as $user) {
         if ($user->id() == 0) continue;
@@ -242,10 +246,14 @@ class BookingService
   /**
    * Gets rich adviser options for form radios (as cards).
    */
-  public function getAdviserRichOptions(): array
+  public function getAdviserRichOptions($agencyId = NULL): array
   {
     try {
-      $users = $this->entityTypeManager->getStorage('user')->loadByProperties(['status' => 1]);
+      $properties = ['status' => 1];
+      if ($agencyId) {
+        $properties['field_agency'] = $agencyId;
+      }
+      $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
       $options = [];
       foreach ($users as $user) {
         if ($user->id() == 0) continue;

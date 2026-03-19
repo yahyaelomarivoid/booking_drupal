@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the booking module.
+ */
+
+use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Add the 'field_agency' entity reference to the User entity.
+ */
+function booking_update_8001() {
+  if (!FieldStorageConfig::loadByName('user', 'field_agency')) {
+    FieldStorageConfig::create([
+      'field_name' => 'field_agency',
+      'entity_type' => 'user',
+      'type' => 'entity_reference',
+      'settings' => [
+        'target_type' => 'agency',
+      ],
+    ])->save();
+  }
+
+  if (!FieldConfig::loadByName('user', 'user', 'field_agency')) {
+    FieldConfig::create([
+      'field_name' => 'field_agency',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'Agency',
+    ])->save();
+    
+    $display = \Drupal::entityTypeManager()
+      ->getStorage('entity_form_display')
+      ->load('user.user.default');
+    if ($display) {
+      $display->setComponent('field_agency', [
+        'type' => 'entity_reference_autocomplete',
+        'weight' => 5,
+      ])->save();
+    }
+  }
+
+  return 'Successfully checked/added the Agency field to user accounts.';
+}
