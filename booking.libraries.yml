@@ -1,0 +1,5 @@
+form_cards:
+  version: VERSION
+  css:
+    theme:
+      css/booking-cards.css: {}

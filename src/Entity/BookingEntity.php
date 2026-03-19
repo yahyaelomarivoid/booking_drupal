@@ -74,10 +74,12 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
       ->setLabel(new TranslatableMarkup("Customer name"))
       ->setRequired(TRUE)
       ->setSetting('max_length', 128)
-      ->addConstraint('Length', [
-        'min' => 2,
-        'max' => 128,
-        'minMessage' => 'The customer name must be at least 2 characters long.',
+      ->addPropertyConstraints('value', [
+        'Length' => [
+          'min' => 2,
+          'max' => 128,
+          'minMessage' => 'The customer name must be at least 2 characters long.',
+        ]
       ])
       ->setDisplayOptions('view', ['label' => 'above', 'type' => 'string', 'weight' => 0])
       ->setDisplayOptions('form', ['type' => 'string_textfield', 'weight' => 0])
@@ -96,9 +98,11 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
       ->setLabel(new TranslatableMarkup('Phone number'))
       ->setRequired(TRUE)
       ->setSetting('max_length', 20)
-      ->addConstraint('Regex', [
-        'pattern' => '/^[\+\d\s\-\(\)]+$/',
-        'message' => 'The phone number contains invalid characters. Only digits, spaces, dashes, and plus signs are allowed.',
+      ->addPropertyConstraints('value', [
+        'Regex' => [
+          'pattern' => '/^[\+\d\s\-\(\)]+$/',
+          'message' => 'The phone number contains invalid characters. Only digits, spaces, dashes, and plus signs are allowed.',
+        ]
       ])
       ->setDisplayOptions('view', ['label' => 'above', 'type' => 'string', 'weight' => 2])
       ->setDisplayOptions('form', ['type' => 'string_textfield', 'weight' => 2])

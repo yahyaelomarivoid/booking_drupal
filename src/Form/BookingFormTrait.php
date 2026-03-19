@@ -18,7 +18,7 @@ trait BookingFormTrait
   {
     try {
       $stored = $form_state->get('stored_values') ?: [];
-      $options = $this->bookingService->getAgencyOptions();
+      $options = $this->bookingService->getAgencyRichOptions();
       if (empty($options)) {
         $this->messenger()->addWarning($this->t('No agencies available at the moment.'));
       }
@@ -29,6 +29,10 @@ trait BookingFormTrait
         '#options' => $options,
         '#required' => TRUE,
         '#default_value' => $stored['agency_options'] ?? NULL,
+        '#attributes' => ['class' => ['booking-cards-wrapper']],
+        '#attached' => [
+          'library' => ['booking/form_cards'],
+        ],
         '#ajax' => [
           'callback' => '::ajaxCallback',
           'wrapper' => 'booking-form-wrapper',
@@ -47,13 +51,17 @@ trait BookingFormTrait
   {
     try {
       $stored = $form_state->get('stored_values') ?: [];
-      $options = $this->bookingService->getAdviserOptions();
+      $options = $this->bookingService->getAdviserRichOptions();
       $form['adviser_options'] = [
         '#type' => 'radios',
         '#title' => $this->t('Select an adviser'),
         '#options' => $options,
         '#required' => TRUE,
         '#default_value' => $stored['adviser_options'] ?? NULL,
+        '#attributes' => ['class' => ['booking-cards-wrapper']],
+        '#attached' => [
+          'library' => ['booking/form_cards'],
+        ],
         '#ajax' => [
           'callback' => '::ajaxCallback',
           'wrapper' => 'booking-form-wrapper',
@@ -72,13 +80,17 @@ trait BookingFormTrait
   {
     try {
       $stored = $form_state->get('stored_values') ?: [];
-      $options = $this->bookingService->getServiceOptions();
+      $options = $this->bookingService->getServiceRichOptions();
       $form['service_options'] = [
         '#type' => 'radios',
         '#title' => $this->t('Select a service'),
         '#options' => $options,
         '#required' => TRUE,
         '#default_value' => $stored['service_options'] ?? NULL,
+        '#attributes' => ['class' => ['booking-cards-wrapper']],
+        '#attached' => [
+          'library' => ['booking/form_cards'],
+        ],
         '#ajax' => [
           'callback' => '::ajaxCallback',
           'wrapper' => 'booking-form-wrapper',

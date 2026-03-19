@@ -1,0 +1,66 @@
+/* Styling for booking cards */
+.booking-cards-wrapper .form-radios {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.booking-cards-wrapper .form-type-radio {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Visually hide the radio input but keep it accessible */
+.booking-cards-wrapper .form-type-radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The card style is applied to the label */
+.booking-cards-wrapper .form-type-radio label {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  height: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.booking-cards-wrapper .form-type-radio label:hover {
+  border-color: #3182ce;
+  box-shadow: 0 4px 6px rgba(49, 130, 206, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Selected state styling */
+.booking-cards-wrapper .form-type-radio input[type="radio"]:checked + label {
+  border-color: #3182ce;
+  background-color: #ebf8ff;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+}
+
+/* Rich content inside the card */
+.booking-card-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.booking-card-detail {
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-top: 0.25rem;
+  line-height: 1.4;
+}
+
+.booking-card-detail strong {
+  color: #2d3748;
+}
