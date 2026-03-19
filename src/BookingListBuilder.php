@@ -21,6 +21,15 @@ class BookingListBuilder extends EntityListBuilder
   public function render()
   {
     $build['filter_form'] = \Drupal::formBuilder()->getForm('\Drupal\booking\Form\BookingFilterForm');
+    $build['export_button'] = [
+      '#type' => 'link',
+      '#title' => $this->t('Export'),
+      '#url' => Url::fromRoute('booking.export'),
+      '#attributes' => [
+        'class' => ['button', 'button--primary'],
+      ],
+    ];
+
     $build += parent::render();
     return $build;
   }

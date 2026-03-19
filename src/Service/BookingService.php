@@ -1,12 +1,13 @@
 <?php
 
-namespace Drupal\booking;
+namespace Drupal\booking\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\booking\Entity\BookingEntity;
 use Drupal\booking\Entity\Enums\BookingStatus;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -84,8 +85,7 @@ class BookingService
     // Normalize date to string if it's a DrupalDateTime object.
     if ($date instanceof \Drupal\Core\Datetime\DrupalDateTime) {
       $date = $date->format('Y-m-d\TH:i:s');
-    }
-    elseif (is_array($date)) {
+    } elseif (is_array($date)) {
       // Handle array format ['date' => '...', 'time' => '...']
       $date_str = $date['date'] ?? '';
       $time_str = $date['time'] ?? '00:00:00';
@@ -183,7 +183,8 @@ class BookingService
       $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
       $options = [];
       foreach ($users as $user) {
-        if ($user->id() == 0) continue;
+        if ($user->id() == 0)
+          continue;
         /** @var \Drupal\user\UserInterface $user */
         $options[$user->id()] = $user->getDisplayName();
       }
@@ -223,15 +224,15 @@ class BookingService
       foreach ($agencies as $agency) {
         $card = '<div class="booking-card" style="height: 100%;">';
         $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $agency->label()) . '</h4>';
-        
+
         if ($agency->hasField('address') && !$agency->get('address')->isEmpty()) {
-            $card .= '<div class="booking-card-detail"><strong>' . $this->t('Address') . ':</strong> ' . htmlspecialchars((string) $agency->get('address')->value) . '</div>';
+          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Address') . ':</strong> ' . htmlspecialchars((string) $agency->get('address')->value) . '</div>';
         }
         if ($agency->hasField('phone') && !$agency->get('phone')->isEmpty()) {
-            $card .= '<div class="booking-card-detail"><strong>' . $this->t('Phone') . ':</strong> ' . htmlspecialchars((string) $agency->get('phone')->value) . '</div>';
+          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Phone') . ':</strong> ' . htmlspecialchars((string) $agency->get('phone')->value) . '</div>';
         }
         if ($agency->hasField('operating_hours') && !$agency->get('operating_hours')->isEmpty()) {
-            $card .= '<div class="booking-card-detail"><strong>' . $this->t('Hours') . ':</strong> ' . htmlspecialchars((string) $agency->get('operating_hours')->value) . '</div>';
+          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Hours') . ':</strong> ' . htmlspecialchars((string) $agency->get('operating_hours')->value) . '</div>';
         }
         $card .= '</div>';
         $options[$agency->id()] = \Drupal\Core\Render\Markup::create($card);
@@ -256,16 +257,17 @@ class BookingService
       $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
       $options = [];
       foreach ($users as $user) {
-        if ($user->id() == 0) continue;
+        if ($user->id() == 0)
+          continue;
         /** @var \Drupal\user\UserInterface $user */
-        
+
         $card = '<div class="booking-card" style="height: 100%;">';
         $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $user->getDisplayName()) . '</h4>';
         if ($user->hasField('mail') && !$user->get('mail')->isEmpty()) {
-             $card .= '<div class="booking-card-detail"><strong>' . $this->t('Email') . ':</strong> ' . htmlspecialchars((string) $user->getEmail()) . '</div>';
+          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Email') . ':</strong> ' . htmlspecialchars((string) $user->getEmail()) . '</div>';
         }
         $card .= '</div>';
-        
+
         $options[$user->id()] = \Drupal\Core\Render\Markup::create($card);
       }
       return $options;
@@ -287,7 +289,7 @@ class BookingService
         $card = '<div class="booking-card" style="height: 100%;">';
         $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $term->label()) . '</h4>';
         if ($term->hasField('description') && !$term->get('description')->isEmpty()) {
-             $card .= '<div class="booking-card-detail">' . $term->get('description')->value . '</div>';
+          $card .= '<div class="booking-card-detail">' . $term->get('description')->value . '</div>';
         }
         $card .= '</div>';
         $options[$term->id()] = \Drupal\Core\Render\Markup::create($card);
@@ -298,5 +300,8 @@ class BookingService
       return [];
     }
   }
+
+
+
 
 }

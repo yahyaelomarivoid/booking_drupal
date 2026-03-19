@@ -2,7 +2,7 @@
 
 namespace Drupal\booking\Plugin\Validation\Constraint;
 
-use Drupal\booking\BookingService;
+use Drupal\booking\Service\BookingService;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
@@ -17,7 +17,7 @@ class DoubleBookingConstraintValidator extends ConstraintValidator implements Co
   /**
    * The booking service.
    *
-   * @var \Drupal\booking\BookingService
+   * @var \Drupal\booking\Service\BookingService
    */
   protected $bookingService;
 

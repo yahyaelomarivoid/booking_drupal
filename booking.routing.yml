@@ -75,3 +75,14 @@ entity.booking.delete_form:
   requirements:
     _permission: "access content"
     booking: \d+
+
+# Admin: export csv data
+booking.export:
+  path: "/admin/structure/booking/export"
+  defaults:
+    _controller: '\Drupal\booking\Controller\BookingController::exportData'
+    _title: "Export Bookings"
+  requirements:
+    _permission: "access content"
+    
+ 

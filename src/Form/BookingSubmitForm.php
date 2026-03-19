@@ -2,7 +2,7 @@
 
 namespace Drupal\booking\Form;
 
-use Drupal\booking\BookingService;
+use Drupal\booking\Service\BookingService;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
