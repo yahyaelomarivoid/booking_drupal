@@ -82,7 +82,6 @@ class BookingService
       return FALSE;
     }
 
-    // Normalize date to string if it's a DrupalDateTime object.
     if ($date instanceof \Drupal\Core\Datetime\DrupalDateTime) {
       $date = $date->format('Y-m-d\TH:i:s');
     } elseif (is_array($date)) {
@@ -147,8 +146,7 @@ class BookingService
         '@message' => $e->getMessage(),
       ]);
       $this->messenger->addError($this->t('An error occurred while validating the booking.'));
-      return TRUE; // Assume busy on error to be safe? Or return FALSE? 
-      // Usually, we want to prevent booking if we can't verify availability.
+      return TRUE;
     }
   }
 
@@ -299,9 +297,4 @@ class BookingService
       $this->logger->error('Error fetching rich service options: @message', ['@message' => $e->getMessage()]);
       return [];
     }
-  }
-
-
-
-
-}
+  }}

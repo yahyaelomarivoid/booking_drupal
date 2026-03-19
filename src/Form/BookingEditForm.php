@@ -10,6 +10,7 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\booking\Entity\Enums\BookingStatus;
+use Drupal\Core\Mail\MailManagerInterface;
 
 /**
  * Front-end form for a client to edit their booking via reference code.
@@ -21,15 +22,18 @@ class BookingEditForm extends FormBase
   protected EntityTypeManagerInterface $entityTypeManager;
   protected BookingService $bookingService;
   protected AccountInterface $currentUser;
+  protected MailManagerInterface $mailManager;
 
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     BookingService $bookingService,
-    AccountInterface $currentUser
+    AccountInterface $currentUser,
+    MailManagerInterface $mailManager
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->bookingService = $bookingService;
     $this->currentUser = $currentUser;
+    $this->mailManager = $mailManager;
   }
 
   public static function create(ContainerInterface $container)
@@ -37,7 +41,8 @@ class BookingEditForm extends FormBase
     return new static(
       $container->get('entity_type.manager'),
       $container->get('booking.service'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('plugin.manager.mail')
     );
   }
 
@@ -71,6 +76,39 @@ class BookingEditForm extends FormBase
         '#type' => 'submit',
         '#value' => $this->t('Find my booking'),
         '#submit' => ['::lookupSubmit'],
+        '#ajax' => [
+          'callback' => '::ajaxCallback',
+          'wrapper' => 'booking-edit-wrapper',
+        ],
+      ];
+      return $form;
+    }
+
+    if (!$form_state->get('verified')) {
+      $form['verification_help'] = [
+        '#markup' => '<div class="messages messages--warning">' . $this->t('A verification code has been sent to your email. Please enter it below to continue.') . '</div>',
+      ];
+      $form['verification_code'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Verification Code'),
+        '#required' => TRUE,
+        '#attributes' => ['placeholder' => '123456'],
+      ];
+      $form['actions']['#type'] = 'actions';
+      $form['actions']['verify'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Verify Code'),
+        '#submit' => ['::verifySubmit'],
+        '#ajax' => [
+          'callback' => '::ajaxCallback',
+          'wrapper' => 'booking-edit-wrapper',
+        ],
+      ];
+      $form['actions']['restart'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Back'),
+        '#limit_validation_errors' => [],
+        '#submit' => ['::restartSubmit'],
         '#ajax' => [
           'callback' => '::ajaxCallback',
           'wrapper' => 'booking-edit-wrapper',
@@ -213,35 +251,71 @@ class BookingEditForm extends FormBase
     return $form['service_wrapper'];
   }
 
-  /**
-   * General AJAX callback.
-   */
   public function ajaxCallback(array &$form, FormStateInterface $form_state): array
   {
     return $form;
   }
 
-  /**
-   * Submit for reference lookup.
-   */
   public function lookupSubmit(array &$form, FormStateInterface $form_state): void
   {
     $reference = strtoupper(trim($form_state->getValue('reference')));
     $results = $this->entityTypeManager->getStorage('booking')->loadByProperties(['reference' => $reference]);
 
     if (empty($results)) {
-      $form_state->setErrorByName('reference', $this->t('No booking found with reference @ref.', ['@ref' => $reference]));
+      $this->messenger()->addError($this->t('No booking found with reference @ref.', ['@ref' => $reference]));
+      $form_state->setRebuild();
       return;
     }
 
     $booking = reset($results);
+    
+    $code = (string) rand(100000, 999999);
+    $booking->set('booking_secret_code', $code);
+    $booking->save();
+
+    // Send the email.
+    try {
+      $to = $booking->get('booking_customer_email')->value;
+      $params = [
+        'code' => $code,
+        'reference' => $booking->get('reference')->value,
+      ];
+      $this->mailManager->mail('booking', 'edit_access_code', $to, 'fr', $params);
+    } catch (\Exception $e) {
+      $this->logger('booking')->error('Failed to send verification email: @msg', ['@msg' => $e->getMessage()]);
+      $this->messenger()->addError($this->t('Unable to send the verification code. Please check your mail server settings.'));
+      $form_state->set('booking', NULL);
+      $form_state->setRebuild();
+      return;
+    }
+
     $form_state->set('booking', $booking);
     $form_state->setRebuild();
   }
 
-  /**
-   * Submit for saving changes.
-   */
+  public function verifySubmit(array &$form, FormStateInterface $form_state): void
+  {
+    $entered_code = trim($form_state->getValue('verification_code'));
+    /** @var \Drupal\booking\Entity\BookingEntity $booking */
+    $booking = $form_state->get('booking');
+
+    if ($booking && $booking->get('booking_secret_code')->value === $entered_code) {
+      $form_state->set('verified', TRUE);
+      $this->messenger()->addStatus($this->t('Code verified successfully.'));
+    }
+    else {
+      $this->messenger()->addError($this->t('Invalid verification code. Please check your email.'));
+    }
+    $form_state->setRebuild();
+  }
+
+  public function restartSubmit(array &$form, FormStateInterface $form_state): void
+  {
+    $form_state->set('booking', NULL);
+    $form_state->set('verified', FALSE);
+    $form_state->setRebuild();
+  }
+
   public function submitForm(array &$form, FormStateInterface $form_state): void
   {
     try {

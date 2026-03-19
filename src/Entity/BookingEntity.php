@@ -148,8 +148,8 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
 
     $fields['booking_status'] = BaseFieldDefinition::create('list_string')
       ->setLabel(new TranslatableMarkup('Status'))
-      ->setRequired(TRUE)
       ->setDefaultValue(BookingStatus::PENDING->value)
+      ->setRequired(TRUE)
       ->setSetting('allowed_values', BookingStatus::labels())
       ->setDisplayOptions('view', ['label' => 'above', 'type' => 'list_default', 'weight' => 7])
       ->setDisplayOptions('form', ['type' => 'options_select', 'weight' => 7])
@@ -163,24 +163,25 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
 
+    $fields['booking_secret_code'] = BaseFieldDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Verification Code'))
+      ->setDescription(new TranslatableMarkup('The 6-digit code for edit access.'))
+      ->setReadOnly(TRUE)
+      ->setSetting('max_length', 6)
+      ->setDisplayOptions('view', ['label' => 'above', 'type' => 'string', 'weight' => 10])
+      ->setDisplayConfigurable('view', TRUE);
+
     return $fields;
   }
 
-  /**
-   * {@inheritdoc}
-   */
   public static function preCreate(EntityStorageInterface $storage, array &$values): void
   {
     parent::preCreate($storage, $values);
-    // Auto-generate a unique reference code.
     if (empty($values['reference'])) {
       $values['reference'] = 'REF-' . strtoupper(date('Ymd')) . '-' . strtoupper(substr(uniqid(), -4));
     }
   }
 
-  /**
-   * Returns the appointment status label.
-   */
   public function getStatusLabel(): string
   {
     $allowed = $this->getFieldDefinition('booking_status')

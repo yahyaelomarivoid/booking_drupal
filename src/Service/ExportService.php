@@ -30,7 +30,6 @@ class ExportService
         fputcsv($handle, ['Reference', 'Date', 'Customer', 'Email', 'Phone', 'Agency', 'Adviser', 'Status']);
 
         try {
-            // Fetching the correct 'booking' entity type mappings
             $storage = $this->entityTypeManager->getStorage('booking');
 
             $chunkSize = 50;

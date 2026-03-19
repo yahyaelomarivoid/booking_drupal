@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Primary module hooks for booking module.
+ */
+
+/**
+ * Implements hook_mail().
+ */
+function booking_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'edit_access_code':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Votre code de vérification pour la réservation @ref', ['@ref' => $params['reference']]);
+      $message['body'][] = t('Bonjour,');
+      $message['body'][] = t('Vous avez demandé à modifier votre réservation. Voici votre code de vérification unique :');
+      $message['body'][] = $params['code'];
+      $message['body'][] = t('Ce code est strictement personnel. Si vous n’êtes pas à l’origine de cette demande, merci d’ignorer cet e-mail.');
+      break;
+
+    case 'status_notification':
+      $message['from'] = \Drupal::config('system.site')->get('mail');
+      $message['subject'] = t('Mise à jour de votre réservation : @ref', ['@ref' => $params['reference']]);
+      $message['body'][] = t('Bonjour,');
+      $message['body'][] = t('Le statut de votre réservation a été mis à jour.');
+      $message['body'][] = t('Nouveau statut : @status', ['@status' => $params['status_label']]);
+      $message['body'][] = t('Merci de votre confiance.');
+      break;
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ */
+function booking_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'booking' && !$entity->isNew()) {
+    $original = $entity->original;
+    if ($original && $entity->get('booking_status')->value !== $original->get('booking_status')->value) {
+      $mail_manager = \Drupal::service('plugin.manager.mail');
+      $module = 'booking';
+      $key = 'status_notification';
+      $to = $entity->get('booking_customer_email')->value;
+      
+      /** @var \Drupal\booking\Entity\BookingEntity $entity */
+      $status_label = $entity->getStatusLabel();
+
+      $params = [
+        'reference' => $entity->get('reference')->value,
+        'status_label' => $status_label,
+      ];
+      
+      $mail_manager->mail($module, $key, $to, 'fr', $params);
+    }
+  }
+}

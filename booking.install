@@ -44,3 +44,19 @@ function booking_update_8001() {
 
   return 'Successfully checked/added the Agency field to user accounts.';
 }
+
+/**
+ * Add the 'booking_secret_code' field to the Booking entity.
+ */
+function booking_update_8002() {
+  $field_storage_definition = \Drupal\Core\Field\BaseFieldDefinition::create('string')
+    ->setLabel(t('Verification Code'))
+    ->setDescription(t('The 6-digit code for edit access.'))
+    ->setReadOnly(TRUE)
+    ->setSetting('max_length', 6);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition('booking_secret_code', 'booking', 'booking', $field_storage_definition);
+
+  return t('Field booking_secret_code has been successfully installed.');
+}

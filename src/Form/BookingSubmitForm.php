@@ -52,7 +52,6 @@ class BookingSubmitForm extends FormBase
     $step = $form_state->get('step') ?: 1;
     $form_state->set('step', $step);
 
-    // Initialize stored values array if not present.
     if (!$form_state->has('stored_values')) {
       $form_state->set('stored_values', []);
     }
@@ -147,7 +146,6 @@ class BookingSubmitForm extends FormBase
         break;
       case 4:
         $date = $form_state->getValue('date_time');
-        // Normalize date to string immediately.
         if ($date instanceof DrupalDateTime) {
           $date = $date->format('Y-m-d\TH:i:s');
         }
@@ -185,7 +183,6 @@ class BookingSubmitForm extends FormBase
   {
     $step = $form_state->get('step');
 
-    // Store values from current step before advancing.
     if ($step < 6) {
       $this->storeCurrentStepValues($form_state);
       $form_state->set('step', $step + 1);
@@ -193,7 +190,6 @@ class BookingSubmitForm extends FormBase
       return;
     }
 
-    // Final Save — step 6 confirmation was shown, user clicked submit (Finish).
     try {
       $stored = $form_state->get('stored_values');
 
