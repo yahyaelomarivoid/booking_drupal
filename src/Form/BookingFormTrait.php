@@ -167,7 +167,6 @@ trait BookingFormTrait
   {
     $stored = $form_state->get('stored_values') ?: [];
 
-    // Resolve IDs to human-readable labels.
     $agency_label = $stored['agency_options'] ?? '';
     $adviser_label = $stored['adviser_options'] ?? '';
     $service_label = $stored['service_options'] ?? '';
@@ -182,7 +181,6 @@ trait BookingFormTrait
       $service_options = $this->bookingService->getServiceOptions();
       $service_label = $service_options[$stored['service_options']] ?? $stored['service_options'];
     } catch (\Exception $e) {
-      // Fallback to raw IDs if resolution fails.
     }
 
     $date_value = $stored['date_time'] ?? '';
@@ -191,7 +189,6 @@ trait BookingFormTrait
       $date_display = $date_value->format('Y-m-d H:i');
     }
     elseif (is_string($date_value) && !empty($date_value)) {
-      // If it's already a string (normalized in storeCurrentStepValues), just use it.
       $date_display = str_replace('T', ' ', $date_value);
     }
 

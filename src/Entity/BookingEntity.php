@@ -60,7 +60,6 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
   {
     $fields = parent::baseFieldDefinitions($entity_type);
 
-    // Unique booking reference (e.g. REF-20260316-A3F2).
     $fields['reference'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Reference'))
       ->setDescription(new TranslatableMarkup('Unique appointment reference code.'))
@@ -151,6 +150,7 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
       ->setDefaultValue(BookingStatus::PENDING->value)
       ->setRequired(TRUE)
       ->setSetting('allowed_values', BookingStatus::labels())
+      ->addConstraint('ValidBookingStatusTransition', [])
       ->setDisplayOptions('view', ['label' => 'above', 'type' => 'list_default', 'weight' => 7])
       ->setDisplayOptions('form', ['type' => 'options_select', 'weight' => 7])
       ->setDisplayConfigurable('form', TRUE)

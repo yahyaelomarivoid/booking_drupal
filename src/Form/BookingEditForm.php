@@ -362,7 +362,6 @@ class BookingEditForm extends FormBase
    */
   public function cancelSubmit(array &$form, FormStateInterface $form_state): void
   {
-    $this->messenger()->addStatus('Debug: cancelSubmit called.');
     try {
       /** @var \Drupal\booking\Entity\BookingEntity $stored_booking */
       $stored_booking = $form_state->get('booking');
@@ -384,18 +383,25 @@ class BookingEditForm extends FormBase
 
       $booking->set('booking_status', BookingStatus::CANCELLED->value);
       
+      // We only care about status transition violations for a cancellation.
       $violations = $booking->validate();
-      if ($violations->count() > 0) {
-        foreach ($violations as $violation) {
-          $this->messenger()->addError($violation->getMessage());
+      $status_violations = [];
+      foreach ($violations as $v) {
+        if ($v->getPropertyPath() === 'booking_status') {
+          $status_violations[] = $v;
+          $this->messenger()->addError($v->getMessage());
         }
+      }
+
+      if (count($status_violations) > 0) {
         return;
       }
       
+      // Save directly, allowing the status change to persist even if other fields are technically invalid.
       $booking->save();
+      $this->logger('booking')->notice('Booking @id cancelled successfully.', ['@id' => $booking->id()]);
       $this->messenger()->addStatus($this->t('Your booking has been cancelled.'));
       
-      // Clear the booking from form state and redirect to start.
       $form_state->set('booking', NULL);
       $form_state->setRedirect('booking.mes-rdv');
     } catch (\Exception $e) {

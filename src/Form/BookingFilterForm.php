@@ -43,7 +43,6 @@ class BookingFilterForm extends FormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $request = $this->requestStack->getCurrentRequest();
     
-    // Use an inline container for better visual layout by default
     $form['filters'] = [
       '#type' => 'container',
       '#attributes' => ['class' => ['form--inline', 'clearfix']],

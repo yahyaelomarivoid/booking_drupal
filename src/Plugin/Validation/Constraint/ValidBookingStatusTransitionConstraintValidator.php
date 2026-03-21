@@ -17,12 +17,20 @@ class ValidBookingStatusTransitionConstraintValidator extends ConstraintValidato
    */
   public function validate($entity, Constraint $constraint)
   {
-    if ($entity->isNew() || !isset($entity->original)) {
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $booking */
+    $booking = ($entity instanceof \Drupal\Core\Entity\EntityInterface) ? $entity : $entity->getEntity();
+
+    if ($booking->isNew()) {
       return;
     }
 
-    $original_status = $entity->original->get('booking_status')->value;
-    $new_status = $entity->get('booking_status')->value;
+    $original = $booking->original ?? \Drupal::entityTypeManager()->getStorage('booking')->loadUnchanged($booking->id());
+    if (!$original) {
+      return;
+    }
+
+    $original_status = $original->get('booking_status')->value;
+    $new_status = $booking->get('booking_status')->value;
 
     if ($original_status === $new_status) {
       return;

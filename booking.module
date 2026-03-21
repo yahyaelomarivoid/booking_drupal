@@ -50,7 +50,14 @@ function booking_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
         'status_label' => $status_label,
       ];
       
-      $mail_manager->mail($module, $key, $to, 'fr', $params);
+      try {
+        $mail_manager->mail($module, $key, $to, 'fr', $params);
+      } catch (\Exception $e) {
+        \Drupal::logger('booking')->error('Automated status email failed for booking @ref: @msg', [
+          '@ref' => $params['reference'],
+          '@msg' => $e->getMessage(),
+        ]);
+      }
     }
   }
 }

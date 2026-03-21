@@ -297,4 +297,5 @@ class BookingService
       $this->logger->error('Error fetching rich service options: @message', ['@message' => $e->getMessage()]);
       return [];
     }
-  }}
+  }
+}

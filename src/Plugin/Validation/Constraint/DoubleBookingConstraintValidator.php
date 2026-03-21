@@ -44,7 +44,6 @@ class DoubleBookingConstraintValidator extends ConstraintValidator implements Co
    */
   public function validate($entity, Constraint $constraint)
   {
-    // Check if we have a double booking using the service.
     if ($this->bookingService->hasDoubleBooking($entity)) {
       $this->context->addViolation($constraint->message);
     }

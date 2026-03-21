@@ -15,7 +15,7 @@ class BookingListBuilder extends EntityListBuilder
   public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage)
   {
     parent::__construct($entity_type, $storage);
-    $this->limit = 10; // Automatically handles pagination
+    $this->limit = 10;
   }
 
   public function render()
