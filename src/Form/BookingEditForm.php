@@ -200,15 +200,58 @@ class BookingEditForm extends FormBase
       '#required' => TRUE,
     ];
 
-    // Date/time
-    $form['booking_date'] = [
-      '#type' => 'datetime',
+    // Date selection
+    $form['booking_date_selection'] = [
+      '#type' => 'date',
       '#title' => $this->t('Appointment date'),
       '#default_value' => !empty($booking->get('booking_date')->value)
-        ? DrupalDateTime::createFromFormat('Y-m-d\TH:i:s', $booking->get('booking_date')->value)
+        ? explode('T', $booking->get('booking_date')->value)[0]
         : NULL,
       '#required' => TRUE,
+      '#ajax' => [
+        'callback' => '::dateChanged',
+        'wrapper' => 'time-slot-wrapper',
+        'event' => 'change',
+      ],
     ];
+
+    // Time slot selection
+    $form['time_slot_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'time-slot-wrapper'],
+    ];
+
+    $selected_date = $form_state->getValue('booking_date_selection') ?? explode('T', $booking->get('booking_date')->value)[0];
+    
+    if ($selected_date && $selected_adviser) {
+      $available_slots = $this->bookingService->getAvailableTimeSlots((int) $selected_adviser, $selected_date);
+      $current_time = substr(explode('T', $booking->get('booking_date')->value)[1], 0, 5);
+      
+      // If editing, the CURRENT slot should be included even if it's "busy" by the database
+      if (!in_array($current_time, $available_slots)) {
+        $available_slots[] = $current_time;
+        sort($available_slots);
+      }
+
+      $options = [];
+      foreach ($available_slots as $slot) {
+        $hour = (int) explode(':', $slot)[0];
+        $label = $slot . ' - ' . sprintf('%02d:00', $hour + 1);
+        $options[$slot] = $label;
+      }
+
+      $form['time_slot_wrapper']['booking_time_slot'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Time slot (1 hour)'),
+        '#options' => $options,
+        '#default_value' => $form_state->getValue('booking_time_slot') ?? $current_time,
+        '#required' => TRUE,
+        '#attributes' => ['class' => ['booking-cards-wrapper']],
+        '#attached' => [
+          'library' => ['booking/form_cards'],
+        ],
+      ];
+    }
 
     // Customer name
     $form['booking_customer_name'] = [
@@ -249,6 +292,14 @@ class BookingEditForm extends FormBase
   public function adviserChanged(array &$form, FormStateInterface $form_state): array
   {
     return $form['service_wrapper'];
+  }
+
+  /**
+   * AJAX callback: re-renders time slots when date changes.
+   */
+  public function dateChanged(array &$form, FormStateInterface $form_state): array
+  {
+    return $form['time_slot_wrapper'];
   }
 
   public function ajaxCallback(array &$form, FormStateInterface $form_state): array
@@ -327,10 +378,9 @@ class BookingEditForm extends FormBase
         return;
       }
 
-      $date = $form_state->getValue('booking_date');
-      $date_string = ($date instanceof DrupalDateTime)
-        ? $date->format('Y-m-d\TH:i:s')
-        : $date;
+      $dateOnly = $form_state->getValue('booking_date_selection');
+      $timeSlot = $form_state->getValue('booking_time_slot');
+      $date_string = $dateOnly . 'T' . $timeSlot . ':00';
 
       $booking->set('booking_agency', $form_state->getValue('booking_agency'));
       $booking->set('booking_adviser', $form_state->getValue('booking_adviser'));

@@ -314,4 +314,58 @@ class BookingService
       return [];
     }
   }
+
+  /**
+   * Generates available 1-hour time slots for an adviser on a specific date.
+   */
+  public function getAvailableTimeSlots(int $adviserId, string $date): array
+  {
+    try {
+      $adviser = $this->entityTypeManager->getStorage('user')->load($adviserId);
+      if (!$adviser || !$adviser->hasField('field_working_hours')) {
+        return [];
+      }
+
+      $workingHours = $adviser->get('field_working_hours')->value ?? '09:00-17:00';
+      $ranges = explode(',', $workingHours);
+      $allSlots = [];
+
+      foreach ($ranges as $range) {
+        if (str_contains($range, '-')) {
+          [$start, $end] = explode('-', trim($range));
+          $startTime = (int) explode(':', $start)[0];
+          $endTime = (int) explode(':', $end)[0];
+
+          for ($hour = $startTime; $hour < $endTime; $hour++) {
+            $allSlots[] = sprintf('%02d:00', $hour);
+          }
+        }
+      }
+
+      $query = $this->entityTypeManager->getStorage('booking')->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('booking_adviser', $adviserId)
+        ->condition('booking_date', $date . '%', 'LIKE')
+        ->condition('booking_status', BookingStatus::CANCELLED->value, '<>');
+
+      $bookingIds = $query->execute();
+      $bookings = $this->entityTypeManager->getStorage('booking')->loadMultiple($bookingIds);
+
+      $busySlots = [];
+      foreach ($bookings as $busy) {
+        $bookingDate = $busy->get('booking_date')->value;
+        if ($bookingDate) {
+          $timePart = (str_contains($bookingDate, 'T')) ? explode('T', $bookingDate)[1] : explode(' ', $bookingDate)[1];
+          // Round down to the nearest hour for the busy list
+          $hour = explode(':', $timePart)[0];
+          $busySlots[] = $hour . ':00';
+        }
+      }
+
+      return array_values(array_filter($allSlots, fn($slot) => !in_array($slot, $busySlots)));
+    } catch (\Exception $e) {
+      $this->logger->error('Error calculating time slots: @message', ['@message' => $e->getMessage()]);
+      return [];
+    }
+  }
 }

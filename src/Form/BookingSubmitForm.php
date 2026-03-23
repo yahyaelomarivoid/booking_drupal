@@ -145,11 +145,12 @@ class BookingSubmitForm extends FormBase
         $stored['adviser_options'] = $form_state->getValue('adviser_options');
         break;
       case 4:
-        $date = $form_state->getValue('date_time');
-        if ($date instanceof DrupalDateTime) {
-          $date = $date->format('Y-m-d\TH:i:s');
-        }
-        $stored['date_time'] = $date;
+        $dateOnly = $form_state->getValue('booking_date_selection');
+        $timeSlot = $form_state->getValue('booking_time_slot');
+        $stored['date_only'] = $dateOnly;
+        $stored['time_slot'] = $timeSlot;
+        // Combine into standard ISO format for the entity field
+        $stored['date_time'] = $dateOnly . 'T' . $timeSlot . ':00';
         break;
       case 5:
         $stored['name'] = $form_state->getValue('name');
@@ -167,13 +168,15 @@ class BookingSubmitForm extends FormBase
 
     if ($step == 4) {
       $stored = $form_state->get('stored_values') ?: [];
-      $dateTime = $form_state->getValue('date_time');
+      $dateOnly = $form_state->getValue('booking_date_selection');
+      $timeSlot = $form_state->getValue('booking_time_slot');
       $agencyId = $stored['agency_options'] ?? NULL;
       $adviserId = $stored['adviser_options'] ?? NULL;
 
-      if ($agencyId && $adviserId && $dateTime) {
-        if (!$this->bookingService->checkAvailability($dateTime, $agencyId, $adviserId)) {
-          $form_state->setErrorByName('date_time', $this->t('This slot is no longer available. Please choose another time.'));
+      if ($agencyId && $adviserId && $dateOnly && $timeSlot) {
+        $dateTime = $dateOnly . 'T' . $timeSlot . ':00';
+        if (!$this->bookingService->checkAvailability($dateTime, (int) $agencyId, (int) $adviserId)) {
+          $form_state->setErrorByName('booking_time_slot', $this->t('This slot is no longer available. Please choose another time.'));
         }
       }
     }

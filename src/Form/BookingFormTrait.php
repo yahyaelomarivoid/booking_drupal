@@ -113,16 +113,51 @@ trait BookingFormTrait
   public function buildDateTimeStep(array &$form, FormStateInterface $form_state)
   {
     $stored = $form_state->get('stored_values') ?: [];
-    $form['date_time'] = [
-      '#type' => 'datetime',
-      '#title' => $this->t('Select a date and time'),
+    $adviserId = $stored['adviser_options'] ?? NULL;
+
+    $form['booking_date_selection'] = [
+      '#type' => 'date',
+      '#title' => $this->t('Pick a date'),
       '#required' => TRUE,
-      '#default_value' => $stored['date_time'] ?? NULL,
+      '#default_value' => $stored['date_only'] ?? NULL,
       '#ajax' => [
         'callback' => '::ajaxCallback',
         'wrapper' => 'booking-form-wrapper',
       ],
     ];
+
+    $selectedDate = $form_state->getValue('booking_date_selection') ?? $stored['date_only'] ?? NULL;
+
+    if ($selectedDate && $adviserId) {
+      $availableSlots = $this->bookingService->getAvailableTimeSlots((int) $adviserId, $selectedDate);
+      
+      $options = [];
+      foreach ($availableSlots as $slot) {
+        // Create a nice label e.g. "09:00 - 10:00"
+        $hour = (int) explode(':', $slot)[0];
+        $next = $hour + 1;
+        $label = $slot . ' - ' . sprintf('%02d:00', $next);
+        $options[$slot] = $label;
+      }
+
+      if (empty($options)) {
+        $form['no_slots'] = [
+          '#markup' => '<div class="messages messages--warning">' . $this->t('No available slots for this date.') . '</div>',
+        ];
+      } else {
+        $form['booking_time_slot'] = [
+          '#type' => 'radios',
+          '#title' => $this->t('Choose a time slot (1 hour)'),
+          '#options' => $options,
+          '#required' => TRUE,
+          '#default_value' => $stored['time_slot'] ?? NULL,
+          '#attributes' => ['class' => ['booking-cards-wrapper']],
+          '#attached' => [
+            'library' => ['booking/form_cards'],
+          ],
+        ];
+      }
+    }
   }
 
   /**
