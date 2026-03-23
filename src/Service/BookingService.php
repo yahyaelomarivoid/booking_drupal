@@ -168,17 +168,25 @@ class BookingService
     }
   }
 
-  /**
-   * Gets adviser options.
-   */
-  public function getAdviserOptions($agencyId = NULL): array
+  public function getAdviserOptions($agencyId = NULL, $serviceId = NULL): array
   {
     try {
-      $properties = ['status' => 1];
+      $storage = $this->entityTypeManager->getStorage('user');
+      $query = $storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('status', 1);
+
       if ($agencyId) {
-        $properties['field_agency'] = $agencyId;
+        $query->condition('field_agency', $agencyId);
       }
-      $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
+
+      if ($serviceId) {
+        $query->condition('field_specializations', $serviceId);
+      }
+
+      $uids = $query->execute();
+      $users = $storage->loadMultiple($uids);
+
       $options = [];
       foreach ($users as $user) {
         if ($user->id() == 0)
@@ -242,17 +250,25 @@ class BookingService
     }
   }
 
-  /**
-   * Gets rich adviser options for form radios (as cards).
-   */
-  public function getAdviserRichOptions($agencyId = NULL): array
+  public function getAdviserRichOptions($agencyId = NULL, $serviceId = NULL): array
   {
     try {
-      $properties = ['status' => 1];
+      $storage = $this->entityTypeManager->getStorage('user');
+      $query = $storage->getQuery()
+        ->accessCheck(FALSE)
+        ->condition('status', 1);
+
       if ($agencyId) {
-        $properties['field_agency'] = $agencyId;
+        $query->condition('field_agency', $agencyId);
       }
-      $users = $this->entityTypeManager->getStorage('user')->loadByProperties($properties);
+
+      if ($serviceId) {
+        $query->condition('field_specializations', $serviceId);
+      }
+
+      $uids = $query->execute();
+      $users = $storage->loadMultiple($uids);
+
       $options = [];
       foreach ($users as $user) {
         if ($user->id() == 0)

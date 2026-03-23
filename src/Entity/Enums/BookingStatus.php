@@ -9,6 +9,7 @@ enum BookingStatus: string
     case CONFIRMED = 'confirmed';
     case CANCELLED = 'cancelled';
     case COMPLETED = 'completed';
+    case DELETED = 'deleted';
 
     public function label(): string
     {
@@ -17,6 +18,7 @@ enum BookingStatus: string
             self::CONFIRMED => t('Confirmé'),
             self::CANCELLED => t('Annulé'),
             self::COMPLETED => t('Terminé'),
+            self::DELETED => t('Supprimé'),
         };
     }
 
@@ -27,6 +29,7 @@ enum BookingStatus: string
             self::CONFIRMED->value => t('Confirmé'),
             self::CANCELLED->value => t('Annulé'),
             self::COMPLETED->value => t('Terminé'),
+            self::DELETED->value => t('Supprimé'),
         ];
     }
 }

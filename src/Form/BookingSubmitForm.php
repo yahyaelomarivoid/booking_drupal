@@ -64,10 +64,10 @@ class BookingSubmitForm extends FormBase
         $this->buildAgencyOptionsStep($form, $form_state);
         break;
       case 2:
-        $this->buildAdviserStep($form, $form_state);
+        $this->buildServiceOptionsStep($form, $form_state);
         break;
       case 3:
-        $this->buildServiceOptionsStep($form, $form_state);
+        $this->buildAdviserStep($form, $form_state);
         break;
       case 4:
         $this->buildDateTimeStep($form, $form_state);
@@ -139,10 +139,10 @@ class BookingSubmitForm extends FormBase
         $stored['agency_options'] = $form_state->getValue('agency_options');
         break;
       case 2:
-        $stored['adviser_options'] = $form_state->getValue('adviser_options');
+        $stored['service_options'] = $form_state->getValue('service_options');
         break;
       case 3:
-        $stored['service_options'] = $form_state->getValue('service_options');
+        $stored['adviser_options'] = $form_state->getValue('adviser_options');
         break;
       case 4:
         $date = $form_state->getValue('date_time');
