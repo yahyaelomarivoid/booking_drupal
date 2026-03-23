@@ -87,11 +87,23 @@ class BookingAdminForm extends ContentEntityForm
       $current_date_val = $entity->get('booking_date')->value;
       $default_date = $form_state->getValue('admin_date_selection') ?? (!empty($current_date_val) ? explode('T', $current_date_val)[0] : NULL);
       
-      $form['admin_date_selection'] = [
-        '#type' => 'date',
-        '#title' => $this->t('Appointment Date'),
+      $form['admin_calendar_wrapper'] = [
+        '#type' => 'container',
+        '#attributes' => ['id' => 'admin-calendar-wrapper'],
+      ];
+
+      $form['admin_calendar_wrapper']['calendar_display'] = [
+        '#markup' => '<div id="calendar-container"></div>',
+        '#attached' => [
+          'library' => ['booking/booking_calendar'],
+        ],
+      ];
+
+      $form['admin_calendar_wrapper']['admin_date_selection'] = [
+        '#type' => 'textfield',
+        '#attributes' => ['style' => 'display:none;'],
         '#default_value' => $default_date,
-        '#weight' => $form['booking_date']['#weight'],
+        '#parents' => ['admin_date_selection'],
         '#ajax' => [
           'callback' => [$this, 'updateSlotsCallback'],
           'wrapper' => 'slots-admin-wrapper',
@@ -156,15 +168,14 @@ class BookingAdminForm extends ContentEntityForm
    */
   public function validateForm(array &$form, FormStateInterface $form_state)
   {
-    parent::validateForm($form, $form_state);
-    
-    // Check if the manual date/time combination was selected
     $date = $form_state->getValue('admin_date_selection');
     $slot = $form_state->getValue('admin_time_slot');
     
     if ($date && $slot) {
       $form_state->setValue(['booking_date', 0, 'value'], $date . 'T' . $slot . ':00');
     }
+
+    parent::validateForm($form, $form_state);
   }
 
   /**

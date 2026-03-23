@@ -115,14 +115,27 @@ trait BookingFormTrait
     $stored = $form_state->get('stored_values') ?: [];
     $adviserId = $stored['adviser_options'] ?? NULL;
 
-    $form['booking_date_selection'] = [
-      '#type' => 'date',
-      '#title' => $this->t('Pick a date'),
-      '#required' => TRUE,
+    $form['calendar_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'calendar-wrapper'],
+    ];
+
+    $form['calendar_wrapper']['calendar_display'] = [
+      '#markup' => '<div id="calendar-container"></div>',
+      '#attached' => [
+        'library' => ['booking/booking_calendar'],
+      ],
+    ];
+
+    $form['calendar_wrapper']['booking_date_selection'] = [
+      '#type' => 'textfield',
+      '#attributes' => ['style' => 'display:none;'],
       '#default_value' => $stored['date_only'] ?? NULL,
+      '#parents' => ['booking_date_selection'],
       '#ajax' => [
         'callback' => '::ajaxCallback',
         'wrapper' => 'booking-form-wrapper',
+        'event' => 'change',
       ],
     ];
 

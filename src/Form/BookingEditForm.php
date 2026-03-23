@@ -201,13 +201,20 @@ class BookingEditForm extends FormBase
     ];
 
     // Date selection
+    $form['calendar_display'] = [
+      '#markup' => '<div id="calendar-container"></div>',
+      '#attached' => [
+        'library' => ['booking/booking_calendar'],
+      ],
+    ];
+
     $form['booking_date_selection'] = [
-      '#type' => 'date',
-      '#title' => $this->t('Appointment date'),
+      '#type' => 'textfield',
+      '#attributes' => ['style' => 'display:none;'],
       '#default_value' => !empty($booking->get('booking_date')->value)
         ? explode('T', $booking->get('booking_date')->value)[0]
         : NULL,
-      '#required' => TRUE,
+      '#parents' => ['booking_date_selection'],
       '#ajax' => [
         'callback' => '::dateChanged',
         'wrapper' => 'time-slot-wrapper',

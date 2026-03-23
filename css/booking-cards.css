@@ -64,3 +64,34 @@
 .booking-card-detail strong {
   color: #2d3748;
 }
+
+/* Calendar styling */
+#calendar-container {
+  max-width: 900px;
+  margin: 1.5rem auto;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.fc .fc-button-primary {
+  background-color: #3182ce;
+  border-color: #3182ce;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #2b6cb0;
+  border-color: #2b6cb0;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: #ebf8ff;
+}
