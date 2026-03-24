@@ -8,7 +8,7 @@
         if (!targetInput) return;
 
         const calendar = new FullCalendar.Calendar(container, {
-          initialView: 'dayGridMonth',
+          initialView: 'dayGridMonth', //timeGridWeek to get the view like the gist
           locale: 'fr',
           firstDay: 1, 
           headerToolbar: {

@@ -204,6 +204,10 @@ trait BookingFormTrait
       '#title' => $this->t('Phone'),
       '#required' => TRUE,
       '#default_value' => $stored['phone'] ?? '',
+      '#attributes' => [
+        'pattern' => '0[567][0-9]{8}',
+        'title' => $this->t('10 digits starting with 05, 06, or 07'),
+      ],
     ];
   }
 

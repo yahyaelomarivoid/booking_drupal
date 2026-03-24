@@ -282,6 +282,10 @@ class BookingEditForm extends FormBase
       '#title' => $this->t('Phone'),
       '#default_value' => $booking->get('booking_customer_phone')->value,
       '#required' => TRUE,
+      '#attributes' => [
+        'pattern' => '0[567][0-9]{8}',
+        'title' => $this->t('10 digits starting with 05, 06, or 07'),
+      ],
     ];
   }
 
@@ -372,6 +376,16 @@ class BookingEditForm extends FormBase
       $this->messenger()->addError($this->t('Invalid verification code. Please check your email.'));
     }
     $form_state->setRebuild();
+  }
+
+  public function validateForm(array &$form, FormStateInterface $form_state): void
+  {
+    if ($form_state->get('verified')) {
+      $phone = $form_state->getValue('booking_customer_phone');
+      if (!empty($phone) && !preg_match('/^0[567]\d{8}$/', $phone)) {
+        $form_state->setErrorByName('booking_customer_phone', $this->t('The phone number must be exactly 10 digits and start with 05, 06, or 07.'));
+      }
+    }
   }
 
   public function restartSubmit(array &$form, FormStateInterface $form_state): void

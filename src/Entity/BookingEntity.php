@@ -97,12 +97,12 @@ class BookingEntity extends ContentEntityBase implements ContentEntityInterface
     $fields['booking_customer_phone'] = BaseFieldDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Phone number'))
       ->setRequired(TRUE)
-      ->setSetting('max_length', 20)
+      ->setSetting('max_length', 10)
       ->addPropertyConstraints('value', [
         'Regex' => [
-          'pattern' => '/^[\+\d\s\-\(\)]+$/',
-          'message' => 'The phone number contains invalid characters. Only digits, spaces, dashes, and plus signs are allowed.',
-        ]
+          'pattern' => '/^0[567]\d{8}$/',
+          'message' => 'The phone number must be 10 digits and start with 05, 06, or 07.',
+        ],
       ])
       ->setDisplayOptions('view', ['label' => 'above', 'type' => 'string', 'weight' => 2])
       ->setDisplayOptions('form', ['type' => 'string_textfield', 'weight' => 2])

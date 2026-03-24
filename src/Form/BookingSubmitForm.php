@@ -180,6 +180,13 @@ class BookingSubmitForm extends FormBase
         }
       }
     }
+
+    if ($step == 5) {
+      $phone = $form_state->getValue('phone');
+      if (!empty($phone) && !preg_match('/^0[567]\d{8}$/', $phone)) {
+        $form_state->setErrorByName('phone', $this->t('The phone number must be exactly 10 digits and start with 05, 06, or 07.'));
+      }
+    }
   }
 
   public function submitForm(array &$form, FormStateInterface $form_state)
