@@ -1,0 +1,18 @@
+<div class="booking-card" style="height: 100%;">
+  <h4 class="booking-card-title">{{ title }}</h4>
+  {% if address %}
+    <div class="booking-card-detail"><strong>{{ 'Address'|t }}:</strong> {{ address }}</div>
+  {% endif %}
+  {% if phone %}
+    <div class="booking-card-detail"><strong>{{ 'Phone'|t }}:</strong> {{ phone }}</div>
+  {% endif %}
+  {% if email %}
+    <div class="booking-card-detail"><strong>{{ 'Email'|t }}:</strong> {{ email }}</div>
+  {% endif %}
+  {% if hours %}
+    <div class="booking-card-detail"><strong>{{ 'Hours'|t }}:</strong> {{ hours }}</div>
+  {% endif %}
+  {% if description %}
+    <div class="booking-card-detail">{{ description|raw }}</div>
+  {% endif %}
+</div>

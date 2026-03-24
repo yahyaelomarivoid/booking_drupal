@@ -228,20 +228,14 @@ class BookingService
       $agencies = $this->entityTypeManager->getStorage('agency')->loadMultiple();
       $options = [];
       foreach ($agencies as $agency) {
-        $card = '<div class="booking-card" style="height: 100%;">';
-        $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $agency->label()) . '</h4>';
-
-        if ($agency->hasField('address') && !$agency->get('address')->isEmpty()) {
-          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Address') . ':</strong> ' . htmlspecialchars((string) $agency->get('address')->value) . '</div>';
-        }
-        if ($agency->hasField('phone') && !$agency->get('phone')->isEmpty()) {
-          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Phone') . ':</strong> ' . htmlspecialchars((string) $agency->get('phone')->value) . '</div>';
-        }
-        if ($agency->hasField('operating_hours') && !$agency->get('operating_hours')->isEmpty()) {
-          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Hours') . ':</strong> ' . htmlspecialchars((string) $agency->get('operating_hours')->value) . '</div>';
-        }
-        $card .= '</div>';
-        $options[$agency->id()] = \Drupal\Core\Render\Markup::create($card);
+        $build = [
+          '#theme' => 'booking_card',
+          '#title' => $agency->label(),
+          '#address' => ($agency->hasField('address') && !$agency->get('address')->isEmpty()) ? $agency->get('address')->value : "no adress",
+          '#phone' => ($agency->hasField('phone') && !$agency->get('phone')->isEmpty()) ? $agency->get('phone')->value : "no phone",
+          '#hours' => ($agency->hasField('operating_hours') && !$agency->get('operating_hours')->isEmpty()) ? $agency->get('operating_hours')->value : "no hours",
+        ];
+        $options[$agency->id()] = \Drupal::service('renderer')->renderInIsolation($build);
       }
       return $options;
     } catch (\Exception $e) {
@@ -275,14 +269,12 @@ class BookingService
           continue;
         /** @var \Drupal\user\UserInterface $user */
 
-        $card = '<div class="booking-card" style="height: 100%;">';
-        $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $user->getDisplayName()) . '</h4>';
-        if ($user->hasField('mail') && !$user->get('mail')->isEmpty()) {
-          $card .= '<div class="booking-card-detail"><strong>' . $this->t('Email') . ':</strong> ' . htmlspecialchars((string) $user->getEmail()) . '</div>';
-        }
-        $card .= '</div>';
-
-        $options[$user->id()] = \Drupal\Core\Render\Markup::create($card);
+        $build = [
+          '#theme' => 'booking_card',
+          '#title' => $user->getDisplayName(),
+          '#email' => ($user->hasField('mail') && !$user->get('mail')->isEmpty()) ? $user->getEmail() : "no email",
+        ];
+        $options[$user->id()] = \Drupal::service('renderer')->renderInIsolation($build);
       }
       return $options;
     } catch (\Exception $e) {
@@ -300,13 +292,12 @@ class BookingService
       $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties(['vid' => 'services']);
       $options = [];
       foreach ($terms as $term) {
-        $card = '<div class="booking-card" style="height: 100%;">';
-        $card .= '<h4 class="booking-card-title">' . htmlspecialchars((string) $term->label()) . '</h4>';
-        if ($term->hasField('description') && !$term->get('description')->isEmpty()) {
-          $card .= '<div class="booking-card-detail">' . $term->get('description')->value . '</div>';
-        }
-        $card .= '</div>';
-        $options[$term->id()] = \Drupal\Core\Render\Markup::create($card);
+        $build = [
+          '#theme' => 'booking_card',
+          '#title' => $term->label(),
+          '#description' => ($term->hasField('description') && !$term->get('description')->isEmpty()) ? $term->get('description')->value : NULL,
+        ];
+        $options[$term->id()] = \Drupal::service('renderer')->renderInIsolation($build);
       }
       return $options;
     } catch (\Exception $e) {

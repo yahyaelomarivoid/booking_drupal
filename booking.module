@@ -61,3 +61,20 @@ function booking_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
     }
   }
 }
+/**
+ * Implements hook_theme().
+ */
+function booking_theme() {
+  return [
+    'booking_card' => [
+      'variables' => [
+        'title' => NULL,
+        'address' => NULL,
+        'phone' => NULL,
+        'email' => NULL,
+        'hours' => NULL,
+        'description' => NULL,
+      ],
+    ],
+  ];
+}
