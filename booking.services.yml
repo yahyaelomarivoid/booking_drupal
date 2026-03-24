@@ -1,8 +1,12 @@
 services:
   booking.service:
     class: Drupal\booking\Service\BookingService
-    arguments: ['@entity_type.manager', '@logger.factory', '@messenger']
+    arguments: ['@entity_type.manager', '@logger.factory', '@messenger', '@config.factory']
 
   booking.export_service:
     class: Drupal\booking\Service\ExportService
     arguments: ['@entity_type.manager', '@logger.factory']
+
+  booking.mail_service:
+    class: Drupal\booking\Service\BookingMailService
+    arguments: ['@plugin.manager.mail', '@renderer', '@logger.factory', '@config.factory']

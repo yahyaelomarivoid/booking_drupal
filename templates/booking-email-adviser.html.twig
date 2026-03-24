@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * Template for adviser notification emails.
+ *
+ * Available variables:
+ * - reference: The booking reference.
+ * - customer_name: The name of the customer.
+ * - booking_date: The date and time of the booking.
+ * - status_label: The current status of the booking.
+ * - type: The type of notification ('new' or 'status_change').
+ */
+#}
+<div class="booking-email-adviser">
+  <p>{{ 'Bonjour,'|t }}</p>
+  
+  {% if type == 'new' %}
+    <p>{{ 'Une nouvelle réservation a été effectuée.'|t }}</p>
+  {% else %}
+    <p>{{ 'Le statut d’une réservation qui vous est assignée a été mis à jour.'|t }}</p>
+  {% endif %}
+  
+  <div style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #fafafa;">
+    <p><strong>{{ 'Référence :'|t }}</strong> {{ reference }}</p>
+    <p><strong>{{ 'Client :'|t }}</strong> {{ customer_name }}</p>
+    <p><strong>{{ 'Date et heure :'|t }}</strong> {{ booking_date }}</p>
+    <p><strong>{{ 'Statut actuel :'|t }}</strong> {{ status_label }}</p>
+  </div>
+  
+  <p>{{ 'Vous pouvez consulter les détails dans l’administration du site.'|t }}</p>
+</div>

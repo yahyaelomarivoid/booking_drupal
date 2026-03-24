@@ -1,0 +1,4 @@
+slot_duration: 60
+default_start_hour: '09:00'
+default_end_hour: '18:00'
+notifications_enabled: true

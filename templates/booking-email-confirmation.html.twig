@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Template for booking confirmation emails.
+ *
+ * Available variables:
+ * - reference: The booking reference.
+ * - customer_name: The name of the customer.
+ * - booking_date: The date and time of the booking.
+ * - agency_name: The name of the agency.
+ */
+#}
+<div class="booking-email-confirmation">
+  <p>{{ 'Bonjour @name,'|t({'@name': customer_name}) }}</p>
+  <p>{{ 'Nous avons le plaisir de vous confirmer votre rendez-vous.'|t }}</p>
+  
+  <div style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #fafafa;">
+    <p><strong>{{ 'Référence :'|t }}</strong> {{ reference }}</p>
+    <p><strong>{{ 'Date et heure :'|t }}</strong> {{ booking_date }}</p>
+    <p><strong>{{ 'Agence :'|t }}</strong> {{ agency_name }}</p>
+  </div>
+  
+  <p>{{ 'Vous pouvez gérer ou annuler votre réservation à tout moment sur notre site en utilisant votre référence.'|t }}</p>
+  <p>{{ 'Merci de votre confiance.'|t }}</p>
+</div>

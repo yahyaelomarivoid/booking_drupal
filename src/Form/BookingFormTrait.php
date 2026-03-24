@@ -142,14 +142,17 @@ trait BookingFormTrait
     $selectedDate = $form_state->getValue('booking_date_selection') ?? $stored['date_only'] ?? NULL;
 
     if ($selectedDate && $adviserId) {
+      $config = $this->configFactory->get('booking.settings');
+      $slotDuration = (int) ($config->get('slot_duration') ?? 60);
+      $durationLabel = $slotDuration >= 60 ? ($slotDuration / 60) . ' hour(s)' : $slotDuration . ' minutes';
+
       $availableSlots = $this->bookingService->getAvailableTimeSlots((int) $adviserId, $selectedDate);
-      
+
       $options = [];
       foreach ($availableSlots as $slot) {
-        // Create a nice label e.g. "09:00 - 10:00"
-        $hour = (int) explode(':', $slot)[0];
-        $next = $hour + 1;
-        $label = $slot . ' - ' . sprintf('%02d:00', $next);
+        $startTime = strtotime($selectedDate . ' ' . $slot);
+        $endTime = $startTime + ($slotDuration * 60);
+        $label = date('H:i', $startTime) . ' - ' . date('H:i', $endTime);
         $options[$slot] = $label;
       }
 
@@ -160,7 +163,7 @@ trait BookingFormTrait
       } else {
         $form['booking_time_slot'] = [
           '#type' => 'radios',
-          '#title' => $this->t('Choose a time slot (1 hour)'),
+          '#title' => $this->t('Choose a time slot (@duration)', ['@duration' => $durationLabel]),
           '#options' => $options,
           '#required' => TRUE,
           '#default_value' => $stored['time_slot'] ?? NULL,
@@ -240,8 +243,7 @@ trait BookingFormTrait
     $date_display = $date_value;
     if ($date_value instanceof \Drupal\Core\Datetime\DrupalDateTime) {
       $date_display = $date_value->format('Y-m-d H:i');
-    }
-    elseif (is_string($date_value) && !empty($date_value)) {
+    } elseif (is_string($date_value) && !empty($date_value)) {
       $date_display = str_replace('T', ' ', $date_value);
     }
 

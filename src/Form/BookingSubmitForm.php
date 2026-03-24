@@ -3,6 +3,7 @@
 namespace Drupal\booking\Form;
 
 use Drupal\booking\Service\BookingService;
+use Drupal\booking\Service\BookingMailService;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -22,15 +23,20 @@ class BookingSubmitForm extends FormBase
   protected EntityTypeManagerInterface $entityTypeManager;
   protected BookingService $bookingService;
   protected AccountInterface $currentUser;
+  protected BookingMailService $mailService;
 
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     BookingService $bookingService,
-    AccountInterface $currentUser
+    AccountInterface $currentUser,
+    BookingMailService $mailService,
+    \Drupal\Core\Config\ConfigFactoryInterface $configFactory
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->bookingService = $bookingService;
     $this->currentUser = $currentUser;
+    $this->mailService = $mailService;
+    $this->configFactory = $configFactory;
   }
 
   public static function create(ContainerInterface $container)
@@ -38,7 +44,9 @@ class BookingSubmitForm extends FormBase
     return new static(
       $container->get('entity_type.manager'),
       $container->get('booking.service'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('booking.mail_service'),
+      $container->get('config.factory')
     );
   }
 
@@ -214,7 +222,7 @@ class BookingSubmitForm extends FormBase
         'booking_type' => $stored['service_options'] ?? '',
         'booking_status' => 'pending',
       ]);
-      
+
       $violations = $booking->validate();
       if ($violations->count() > 0) {
         foreach ($violations as $violation) {
@@ -224,6 +232,12 @@ class BookingSubmitForm extends FormBase
       }
 
       $booking->save();
+
+      // Send confirmation emails.
+      $this->mailService->sendBookingConfirmation($booking);
+      $this->mailService->sendAdviserNotification($booking, 'new');
+
+
 
       $this->messenger()->addStatus($this->t('Your booking has been saved successfully! Reference: <strong>@ref</strong>. You can manage it at <a href="@url">@url</a>', [
         '@ref' => $booking->get('reference')->value,

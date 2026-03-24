@@ -85,4 +85,11 @@ booking.export:
   requirements:
     _permission: "export booking data"
     
- 
+# Admin: global settings
+booking.settings:
+  path: "/admin/config/services/booking"
+  defaults:
+    _form: '\Drupal\booking\Form\BookingSettingsForm'
+    _title: 'Booking Settings'
+  requirements:
+    _permission: 'administer booking settings'

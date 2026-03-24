@@ -128,15 +128,20 @@ class BookingAdminForm extends ContentEntityForm
            sort($available_slots);
         }
 
+        $config = \Drupal::config('booking.settings');
+        $slotDuration = (int) ($config->get('slot_duration') ?? 60);
+
         $options = [];
         foreach ($available_slots as $slot) {
-          $hour = (int) explode(':', $slot)[0];
-          $options[$slot] = $slot . ' - ' . sprintf('%02d:00', $hour + 1);
+          $startTime = strtotime($default_date . ' ' . $slot);
+          $endTime = $startTime + ($slotDuration * 60);
+          $options[$slot] = date('H:i', $startTime) . ' - ' . date('H:i', $endTime);
         }
 
+        $durationLabel = $slotDuration >= 60 ? ($slotDuration / 60) . ' hour(s)' : $slotDuration . ' minutes';
         $form['slots_container']['admin_time_slot'] = [
           '#type' => 'radios',
-          '#title' => $this->t('Available Time Slots (1 hour)'),
+          '#title' => $this->t('Available Time Slots (@duration)', ['@duration' => $durationLabel]),
           '#options' => $options,
           '#default_value' => $form_state->getValue('admin_time_slot') ?? $current_time,
           '#required' => TRUE,

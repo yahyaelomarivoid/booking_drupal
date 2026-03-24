@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Template for booking status update emails.
+ *
+ * Available variables:
+ * - reference: The booking reference.
+ * - status_label: The label of the new status.
+ * - customer_name: The name of the customer.
+ */
+#}
+<div class="booking-email-status">
+  <p>{{ 'Bonjour @name,'|t({'@name': customer_name}) }}</p>
+  <p>{{ 'Le statut de votre réservation <strong>@ref</strong> a été mis à jour.'|t({'@ref': reference}) }}</p>
+  <p>{{ 'Nouveau statut : <strong>@status</strong>'|t({'@status': status_label}) }}</p>
+  <p>{{ 'Merci de votre confiance.'|t }}</p>
+</div>

@@ -42,6 +42,13 @@ class BookingService
   protected $messenger;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * Constructs a new BookingService object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
@@ -50,15 +57,19 @@ class BookingService
    *   The logger factory.
    * @param \Drupal\Core\Messenger\MessengerInterface $messenger
    *   The messenger service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     LoggerChannelFactoryInterface $logger_factory,
-    MessengerInterface $messenger
+    MessengerInterface $messenger,
+    \Drupal\Core\Config\ConfigFactoryInterface $config_factory
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->logger = $logger_factory->get('booking');
     $this->messenger = $messenger;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -307,28 +318,37 @@ class BookingService
   }
 
   /**
-   * Generates available 1-hour time slots for an adviser on a specific date.
+   * Generates available time slots for an adviser on a specific date.
+   *
+   * Uses configuration for slot duration and default working hours.
    */
   public function getAvailableTimeSlots(int $adviserId, string $date): array
   {
     try {
-      $adviser = $this->entityTypeManager->getStorage('user')->load($adviserId);
-      if (!$adviser || !$adviser->hasField('field_working_hours')) {
-        return [];
-      }
+      $config = $this->configFactory->get('booking.settings');
+      $slotDuration = (int) ($config->get('slot_duration') ?? 60);
+      $defaultStart = $config->get('default_start_hour') ?? '09:00';
+      $defaultEnd = $config->get('default_end_hour') ?? '18:00';
 
-      $workingHours = $adviser->get('field_working_hours')->value ?? '09:00-17:00';
+      $adviser = $this->entityTypeManager->getStorage('user')->load($adviserId);
+      $workingHours = ($adviser && $adviser->hasField('field_working_hours') && !$adviser->get('field_working_hours')->isEmpty())
+        ? $adviser->get('field_working_hours')->value
+        : $defaultStart . '-' . $defaultEnd;
+
       $ranges = explode(',', $workingHours);
       $allSlots = [];
 
       foreach ($ranges as $range) {
         if (str_contains($range, '-')) {
-          [$start, $end] = explode('-', trim($range));
-          $startTime = (int) explode(':', $start)[0];
-          $endTime = (int) explode(':', $end)[0];
+          [$startStr, $endStr] = explode('-', trim($range));
+          $startTime = strtotime($date . ' ' . $startStr);
+          $endTime = strtotime($date . ' ' . $endStr);
 
-          for ($hour = $startTime; $hour < $endTime; $hour++) {
-            $allSlots[] = sprintf('%02d:00', $hour);
+          // Generate slots based on duration (in seconds)
+          $current = $startTime;
+          while ($current < $endTime) {
+            $allSlots[] = date('H:i', $current);
+            $current += ($slotDuration * 60);
           }
         }
       }
@@ -347,9 +367,7 @@ class BookingService
         $bookingDate = $busy->get('booking_date')->value;
         if ($bookingDate) {
           $timePart = (str_contains($bookingDate, 'T')) ? explode('T', $bookingDate)[1] : explode(' ', $bookingDate)[1];
-          // Round down to the nearest hour for the busy list
-          $hour = explode(':', $timePart)[0];
-          $busySlots[] = $hour . ':00';
+          $busySlots[] = substr($timePart, 0, 5);
         }
       }
 

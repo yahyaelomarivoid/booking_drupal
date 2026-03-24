@@ -1,6 +1,13 @@
 entity.booking.collection:
   title: 'Bookings'
-  description: 'Manage the list of bookings.'
-  parent: system.admin_structure
   route_name: entity.booking.collection
-  weight: 20
+  description: 'List and manage bookings.'
+  parent: system.admin_structure
+  weight: 0
+
+booking.settings:
+  title: 'Booking Settings'
+  description: 'Manage global configuration for the booking system.'
+  parent: system.admin_config_services
+  route_name: booking.settings
+  weight: 10

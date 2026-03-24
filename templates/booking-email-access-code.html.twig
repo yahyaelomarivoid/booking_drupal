@@ -1,0 +1,19 @@
+{#
+/**
+ * @file
+ * Template for booking access code emails.
+ *
+ * Available variables:
+ * - reference: The booking reference.
+ * - code: The verification code.
+ */
+#}
+<div class="booking-email-access-code">
+  <p>{{ 'Bonjour,'|t }}</p>
+  <p>{{ 'Vous avez demandé à modifier votre réservation <strong>@ref</strong>.'|t({'@ref': reference}) }}</p>
+  <p>{{ 'Voici votre code de vérification unique :'|t }}</p>
+  <div style="font-size: 24px; font-weight: bold; padding: 10px; background: #f0f0f0; display: inline-block;">
+    {{ code }}
+  </div>
+  <p>{{ 'Ce code est strictement personnel. Si vous n’êtes pas à l’origine de cette demande, merci d’ignorer cet e-mail.'|t }}</p>
+</div>

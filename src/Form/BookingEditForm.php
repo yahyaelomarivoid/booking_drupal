@@ -3,6 +3,7 @@
 namespace Drupal\booking\Form;
 
 use Drupal\booking\Service\BookingService;
+use Drupal\booking\Service\BookingMailService;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -10,7 +11,6 @@ use Drupal\Core\Session\AccountInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\booking\Entity\Enums\BookingStatus;
-use Drupal\Core\Mail\MailManagerInterface;
 
 /**
  * Front-end form for a client to edit their booking via reference code.
@@ -22,18 +22,20 @@ class BookingEditForm extends FormBase
   protected EntityTypeManagerInterface $entityTypeManager;
   protected BookingService $bookingService;
   protected AccountInterface $currentUser;
-  protected MailManagerInterface $mailManager;
+  protected BookingMailService $mailService;
 
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     BookingService $bookingService,
     AccountInterface $currentUser,
-    MailManagerInterface $mailManager
+    BookingMailService $mailService,
+    \Drupal\Core\Config\ConfigFactoryInterface $configFactory
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->bookingService = $bookingService;
     $this->currentUser = $currentUser;
-    $this->mailManager = $mailManager;
+    $this->mailService = $mailService;
+    $this->configFactory = $configFactory;
   }
 
   public static function create(ContainerInterface $container)
@@ -42,7 +44,8 @@ class BookingEditForm extends FormBase
       $container->get('entity_type.manager'),
       $container->get('booking.service'),
       $container->get('current_user'),
-      $container->get('plugin.manager.mail')
+      $container->get('booking.mail_service'),
+      $container->get('config.factory')
     );
   }
 
@@ -329,6 +332,7 @@ class BookingEditForm extends FormBase
       return;
     }
 
+    /** @var \Drupal\booking\Entity\BookingEntity $booking */
     $booking = reset($results);
 
     // Block access to deleted bookings.
@@ -338,25 +342,19 @@ class BookingEditForm extends FormBase
       return;
     }
     
+    $config = $this->configFactory->get('booking.settings');
+    if (!($config->get('notifications_enabled') ?? TRUE)) {
+      $this->messenger()->addError($this->t('The mail server is currently down please retry later'));
+      $form_state->setRebuild();
+      return;
+    }
+
     $code = (string) rand(100000, 999999);
     $booking->set('booking_secret_code', $code);
     $booking->save();
 
     // Send the email.
-    try {
-      $to = $booking->get('booking_customer_email')->value;
-      $params = [
-        'code' => $code,
-        'reference' => $booking->get('reference')->value,
-      ];
-      $this->mailManager->mail('booking', 'edit_access_code', $to, 'fr', $params);
-    } catch (\Exception $e) {
-      $this->logger('booking')->error('Failed to send verification email: @msg', ['@msg' => $e->getMessage()]);
-      $this->messenger()->addError($this->t('Unable to send the verification code. Please check your mail server settings.'));
-      $form_state->set('booking', NULL);
-      $form_state->setRebuild();
-      return;
-    }
+    $this->mailService->sendAccessCode($booking, $code);
 
     $form_state->set('booking', $booking);
     $form_state->setRebuild();

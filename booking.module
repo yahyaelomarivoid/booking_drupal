@@ -9,25 +9,10 @@
  * Implements hook_mail().
  */
 function booking_mail($key, &$message, $params) {
-  switch ($key) {
-    case 'edit_access_code':
-      $message['from'] = \Drupal::config('system.site')->get('mail');
-      $message['subject'] = t('Votre code de vérification pour la réservation @ref', ['@ref' => $params['reference']]);
-      $message['body'][] = t('Bonjour,');
-      $message['body'][] = t('Vous avez demandé à modifier votre réservation. Voici votre code de vérification unique :');
-      $message['body'][] = $params['code'];
-      $message['body'][] = t('Ce code est strictement personnel. Si vous n’êtes pas à l’origine de cette demande, merci d’ignorer cet e-mail.');
-      break;
-
-    case 'status_notification':
-      $message['from'] = \Drupal::config('system.site')->get('mail');
-      $message['subject'] = t('Mise à jour de votre réservation : @ref', ['@ref' => $params['reference']]);
-      $message['body'][] = t('Bonjour,');
-      $message['body'][] = t('Le statut de votre réservation a été mis à jour.');
-      $message['body'][] = t('Nouveau statut : @status', ['@status' => $params['status_label']]);
-      $message['body'][] = t('Merci de votre confiance.');
-      break;
-  }
+  $message['from'] = \Drupal::config('system.site')->get('mail');
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
+  $message['subject'] = $params['subject'] ?? '';
+  $message['body'][] = $params['body'] ?? '';
 }
 
 /**
@@ -35,29 +20,12 @@ function booking_mail($key, &$message, $params) {
  */
 function booking_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
   if ($entity->getEntityTypeId() === 'booking' && !$entity->isNew()) {
+    /** @var \Drupal\booking\Entity\BookingEntity $entity */
     $original = $entity->original;
     if ($original && $entity->get('booking_status')->value !== $original->get('booking_status')->value) {
-      $mail_manager = \Drupal::service('plugin.manager.mail');
-      $module = 'booking';
-      $key = 'status_notification';
-      $to = $entity->get('booking_customer_email')->value;
-      
-      /** @var \Drupal\booking\Entity\BookingEntity $entity */
-      $status_label = $entity->getStatusLabel();
-
-      $params = [
-        'reference' => $entity->get('reference')->value,
-        'status_label' => $status_label,
-      ];
-      
-      try {
-        $mail_manager->mail($module, $key, $to, 'fr', $params);
-      } catch (\Exception $e) {
-        \Drupal::logger('booking')->error('Automated status email failed for booking @ref: @msg', [
-          '@ref' => $params['reference'],
-          '@msg' => $e->getMessage(),
-        ]);
-      }
+      $mail_service = \Drupal::service('booking.mail_service');
+      $mail_service->sendStatusNotification($entity);
+      $mail_service->sendAdviserNotification($entity, 'status_change');
     }
   }
 }
@@ -74,6 +42,36 @@ function booking_theme() {
         'email' => NULL,
         'hours' => NULL,
         'description' => NULL,
+      ],
+    ],
+    'booking_email_status' => [
+      'variables' => [
+        'reference' => NULL,
+        'status_label' => NULL,
+        'customer_name' => NULL,
+      ],
+    ],
+    'booking_email_access_code' => [
+      'variables' => [
+        'reference' => NULL,
+        'code' => NULL,
+      ],
+    ],
+    'booking_email_confirmation' => [
+      'variables' => [
+        'reference' => NULL,
+        'customer_name' => NULL,
+        'booking_date' => NULL,
+        'agency_name' => NULL,
+      ],
+    ],
+    'booking_email_adviser' => [
+      'variables' => [
+        'reference' => NULL,
+        'customer_name' => NULL,
+        'booking_date' => NULL,
+        'status_label' => NULL,
+        'type' => NULL,
       ],
     ],
   ];
