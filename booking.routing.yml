@@ -5,7 +5,7 @@ booking.rdv:
     _form: '\Drupal\booking\Form\BookingSubmitForm'
     _title: "Prendre un rendez-vous"
   requirements:
-    _permission: "access content"
+    _permission: "create booking"
 
 # Client: Booking step
 booking.rdv.step:
@@ -15,7 +15,7 @@ booking.rdv.step:
     _title: "Prendre un rendez-vous"
     step: 1
   requirements:
-    _permission: "access content"
+    _permission: "create booking"
     step: \d+
 
 # Client: Manage booking by reference
@@ -25,7 +25,7 @@ booking.mes-rdv:
     _form: '\Drupal\booking\Form\BookingEditForm'
     _title: "Gérer mon rendez-vous"
   requirements:
-    _permission: "access content"
+    _permission: "edit own booking"
 
 # Admin: collection list
 entity.booking.collection:
@@ -34,7 +34,7 @@ entity.booking.collection:
     _entity_list: "booking"
     _title: "Booking List"
   requirements:
-    _permission: "access content"
+    _permission: "access booking overview"
 
 # Admin: canonical/detail view
 entity.booking.canonical:
@@ -43,7 +43,7 @@ entity.booking.canonical:
     _entity_view: "booking"
     _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
   requirements:
-    _permission: "access content"
+    _permission: "access booking overview"
     booking: \d+
 
 # Admin: full entity edit form
@@ -53,7 +53,7 @@ entity.booking.edit_form:
     _entity_form: "booking.default"
     _title: "Edit Booking"
   requirements:
-    _permission: "access content"
+    _permission: "edit booking entity"
     booking: \d+
 
 # Admin: status-only form
@@ -63,7 +63,7 @@ entity.booking.status_form:
     _entity_form: "booking.status"
     _title: "Update Booking Status"
   requirements:
-    _permission: "access content"
+    _permission: "edit booking entity"
     booking: \d+
 
 # Admin: delete confirmation form
@@ -73,7 +73,7 @@ entity.booking.delete_form:
     _entity_form: "booking.delete"
     _title: "Delete Booking"
   requirements:
-    _permission: "access content"
+    _permission: "delete booking entity"
     booking: \d+
 
 # Admin: export csv data
@@ -83,6 +83,6 @@ booking.export:
     _controller: '\Drupal\booking\Controller\BookingController::exportData'
     _title: "Export Bookings"
   requirements:
-    _permission: "access content"
+    _permission: "export booking data"
     
  

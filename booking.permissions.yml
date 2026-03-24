@@ -1,0 +1,32 @@
+administer booking:
+  title: 'Administer Booking configuration'
+  description: 'Manage all settings and configurations for the booking module.'
+  restrict access: true
+
+access booking overview:
+  title: 'Access booking overview'
+  description: 'View the administrative list of all bookings.'
+
+add booking entity:
+  title: 'Add new booking'
+  description: 'Create a new booking via the administrative interface.'
+
+edit booking entity:
+  title: 'Edit booking'
+  description: 'Modify details of existing bookings.'
+
+delete booking entity:
+  title: 'Delete booking'
+  description: 'Soft-delete bookings (change status to deleted).'
+
+export booking data:
+  title: 'Export booking data'
+  description: 'Download the CSV export of booking records.'
+
+create booking:
+  title: 'Create booking'
+  description: 'Use the public booking form to schedule a rendezvous.'
+
+edit own booking:
+  title: 'Edit own booking'
+  description: 'Access the self-service edit form using a reference and verification code.'
