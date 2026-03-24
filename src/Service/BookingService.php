@@ -102,7 +102,7 @@ class BookingService
         ->condition('booking_date', $date)
         ->condition('booking_agency', $agencyId)
         ->condition('booking_adviser', $adviserId)
-        ->condition('booking_status', BookingStatus::CANCELLED->value, '<>')
+        ->condition('booking_status', [BookingStatus::CANCELLED->value, BookingStatus::DELETED->value], 'NOT IN')
         ->accessCheck(FALSE);
 
       if ($excludeId) {
@@ -346,7 +346,7 @@ class BookingService
         ->accessCheck(FALSE)
         ->condition('booking_adviser', $adviserId)
         ->condition('booking_date', $date . '%', 'LIKE')
-        ->condition('booking_status', BookingStatus::CANCELLED->value, '<>');
+        ->condition('booking_status', [BookingStatus::CANCELLED->value, BookingStatus::DELETED->value], 'NOT IN');
 
       $bookingIds = $query->execute();
       $bookings = $this->entityTypeManager->getStorage('booking')->loadMultiple($bookingIds);

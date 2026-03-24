@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\booking\Entity\Enums\BookingStatus;
 
 class BookingListBuilder extends EntityListBuilder
 {
@@ -111,8 +112,13 @@ class BookingListBuilder extends EntityListBuilder
       $query->condition($orGroup);
     }
 
-    if ($status = $request->query->get('status')) {
+    $status = $request->query->get('status');
+    if ($status) {
       $query->condition('booking_status', $status);
+    }
+    else {
+      // By default, don't show deleted ones
+      $query->condition('booking_status', BookingStatus::DELETED->value, '<>');
     }
 
     if ($agency = $request->query->get('agency')) {

@@ -8,6 +8,7 @@ use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\booking\Entity\Enums\BookingStatus;
 
 /**
  * Provides an exposed filter form for the admin bookings list.
@@ -59,12 +60,7 @@ class BookingFilterForm extends FormBase {
     $form['filters']['status'] = [
       '#type' => 'select',
       '#title' => $this->t('Status'),
-      '#options' => [
-        '' => $this->t('- All -'),
-        'pending' => $this->t('Pending'),
-        'confirmed' => $this->t('Confirmed'),
-        'cancelled' => $this->t('Cancelled'),
-      ],
+      '#options' => ['' => $this->t('- All -')] + BookingStatus::labels(),
       '#default_value' => $request->query->get('status'),
     ];
 

@@ -326,6 +326,13 @@ class BookingEditForm extends FormBase
     }
 
     $booking = reset($results);
+
+    // Block access to deleted bookings.
+    if ($booking->get('booking_status')->value === BookingStatus::DELETED->value) {
+      $this->messenger()->addError($this->t('This booking has been deleted and cannot be accessed.'));
+      $form_state->setRebuild();
+      return;
+    }
     
     $code = (string) rand(100000, 999999);
     $booking->set('booking_secret_code', $code);

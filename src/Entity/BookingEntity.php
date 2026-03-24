@@ -28,7 +28,7 @@ use Drupal\booking\Entity\Enums\BookingStatus;
  *     "list_builder" = "Drupal\booking\BookingListBuilder",
  *     "form" = {
  *       "default" = "Drupal\booking\Form\BookingAdminForm",
- *       "delete" = "Drupal\Core\Entity\ContentEntityDeleteForm",
+ *       "delete" = "Drupal\booking\Form\BookingSoftDeleteForm",
  *       "status" = "Drupal\booking\Form\BookingStatusForm",
  *     },
  *   },
