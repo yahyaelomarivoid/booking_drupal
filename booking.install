@@ -60,3 +60,26 @@ function booking_update_8002() {
 
   return t('Field booking_secret_code has been successfully installed.');
 }
+/**
+ * Add 'Specializations' and 'Working Hours' to User profile.
+ */
+function booking_update_8003() {
+  $fields = [
+    'field_specializations' => ['type' => 'entity_reference', 'label' => 'Specializations', 'cardinality' => -1],
+    'field_working_hours' => ['type' => 'string', 'label' => 'Working Hours', 'cardinality' => 1],
+  ];
+
+  foreach ($fields as $id => $info) {
+    if (!FieldStorageConfig::loadByName('user', $id)) {
+      FieldStorageConfig::create(['field_name' => $id, 'entity_type' => 'user', 'type' => $info['type'], 'cardinality' => $info['cardinality']])->save();
+      FieldConfig::create(['field_name' => $id, 'entity_type' => 'user', 'bundle' => 'user', 'label' => $info['label']])->save();
+      
+      \Drupal::service('entity_display.repository')
+        ->getFormDisplay('user', 'user', 'default')
+        ->setComponent($id, ['weight' => 20])
+        ->save();
+    }
+  }
+
+  return t('Successfully added User fields.');
+}
