@@ -5,6 +5,7 @@ namespace Drupal\booking\Service;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 class ExportService
 {
@@ -12,11 +13,13 @@ class ExportService
 
     protected $entityTypeManager;
     protected $logger;
+    protected $configFactory;
 
-    public function __construct(EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $logger_factory)
+    public function __construct(EntityTypeManagerInterface $entityTypeManager, LoggerChannelFactoryInterface $logger_factory, ConfigFactoryInterface $config_factory)
     {
         $this->entityTypeManager = $entityTypeManager;
         $this->logger = $logger_factory->get('booking_export');
+        $this->configFactory = $config_factory;
     }
 
     public function prepareDataForExport()
@@ -31,14 +34,26 @@ class ExportService
 
         try {
             $storage = $this->entityTypeManager->getStorage('booking');
+            
+            $config = $this->configFactory->get('booking.settings');
+            $export_mode = $config->get('export_mode') ?? 'global';
+            $export_agency = $config->get('export_agency');
+            $export_adviser = $config->get('export_adviser');
 
             $chunkSize = 50;
             $offset = 0;
             while (TRUE) {
-                $ids = $storage->getQuery()
+                $query = $storage->getQuery()
                     ->accessCheck(FALSE)
-                    ->range($offset, $chunkSize)
-                    ->execute();
+                    ->range($offset, $chunkSize);
+                    
+                if ($export_mode === 'agency' && !empty($export_agency)) {
+                    $query->condition('booking_agency', $export_agency);
+                } elseif ($export_mode === 'adviser' && !empty($export_adviser)) {
+                    $query->condition('booking_adviser', $export_adviser);
+                }
+
+                $ids = $query->execute();
 
                 if (empty($ids)) {
                     break;

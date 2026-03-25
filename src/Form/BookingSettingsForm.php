@@ -65,7 +65,69 @@ class BookingSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('notifications_enabled') ?? TRUE,
     ];
 
+    $form['export_settings'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Export Settings'),
+      '#open' => TRUE,
+    ];
+
+    $form['export_settings']['export_mode'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Export Mode'),
+      '#options' => [
+        'global' => $this->t('Global (All Bookings)'),
+        'agency' => $this->t('By Agency'),
+        'adviser' => $this->t('By Adviser'),
+      ],
+      '#default_value' => $config->get('export_mode') ?? 'global',
+    ];
+
+    $booking_service = \Drupal::service('booking.service');
+
+    $form['export_settings']['export_agency'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select Agency'),
+      '#options' => $booking_service->getAgencyOptions(),
+      '#default_value' => $config->get('export_agency'),
+      '#states' => [
+        'visible' => [
+          ':input[name="export_mode"]' => ['value' => 'agency'],
+        ],
+      ],
+    ];
+
+    $form['export_settings']['export_adviser'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Select Adviser'),
+      '#options' => $booking_service->getAdviserOptions(),
+      '#default_value' => $config->get('export_adviser'),
+      '#states' => [
+        'visible' => [
+          ':input[name="export_mode"]' => ['value' => 'adviser'],
+        ],
+      ],
+    ];
+
     return parent::buildForm($form, $form_state);
+  }
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $start = $form_state->getValue('default_start_hour');
+    $end = $form_state->getValue('default_end_hour');
+
+    $time_pattern = '/^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$/';
+
+    if (!empty($start) && !preg_match($time_pattern, $start)) {
+      $form_state->setErrorByName('default_start_hour', $this->t('The start hour must be in HH:MM format (e.g., 09:00).'));
+    }
+
+    if (!empty($end) && !preg_match($time_pattern, $end)) {
+      $form_state->setErrorByName('default_end_hour', $this->t('The end hour must be in HH:MM format (e.g., 18:00).'));
+    }
+
+    parent::validateForm($form, $form_state);
   }
 
   /**
@@ -77,6 +139,9 @@ class BookingSettingsForm extends ConfigFormBase {
       ->set('default_start_hour', $form_state->getValue('default_start_hour'))
       ->set('default_end_hour', $form_state->getValue('default_end_hour'))
       ->set('notifications_enabled', $form_state->getValue('notifications_enabled'))
+      ->set('export_mode', $form_state->getValue('export_mode'))
+      ->set('export_agency', $form_state->getValue('export_agency'))
+      ->set('export_adviser', $form_state->getValue('export_adviser'))
       ->save();
 
     parent::submitForm($form, $form_state);
