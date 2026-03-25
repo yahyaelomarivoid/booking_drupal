@@ -1,0 +1,37 @@
+id: booking_users
+label: 'Import Booking Advisers'
+migration_group: booking
+migration_dependencies:
+  required:
+    - booking_agencies
+    - booking_services
+source:
+  plugin: csv
+  path: 'modules/custom/booking/migrations/csv/users.csv'
+  ids:
+    - id
+process:
+  name: name
+  mail: mail
+  pass: pass
+  status:
+    plugin: default_value
+    default_value: 1
+  roles:
+    plugin: default_value
+    default_value:
+      - 'booking_adviser'
+  field_agency:
+    plugin: migration_lookup
+    migration: booking_agencies
+    source: agency_id
+  field_specializations:
+    -
+      plugin: explode
+      delimiter: ','
+      source: service_ids
+    -
+      plugin: migration_lookup
+      migration: booking_services
+destination:
+  plugin: 'entity:user'

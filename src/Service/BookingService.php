@@ -215,10 +215,14 @@ class BookingService
   /**
    * Gets service options.
    */
-  public function getServiceOptions(): array
+  public function getServiceOptions($agencyId = NULL): array
   {
     try {
-      $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties(['vid' => 'services']);
+      $properties = ['vid' => 'services'];
+      if ($agencyId) {
+        $properties['field_agency'] = $agencyId;
+      }
+      $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties($properties);
       $options = [];
       foreach ($terms as $term) {
         $options[$term->id()] = $term->label();
@@ -297,10 +301,14 @@ class BookingService
   /**
    * Gets rich service options for form radios (as cards).
    */
-  public function getServiceRichOptions(): array
+  public function getServiceRichOptions($agencyId = NULL): array
   {
     try {
-      $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties(['vid' => 'services']);
+      $properties = ['vid' => 'services'];
+      if ($agencyId) {
+        $properties['field_agency'] = $agencyId;
+      }
+      $terms = $this->entityTypeManager->getStorage('taxonomy_term')->loadByProperties($properties);
       $options = [];
       foreach ($terms as $term) {
         $build = [

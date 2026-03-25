@@ -1,0 +1,22 @@
+id: booking_services
+label: 'Import Booking Services'
+migration_group: booking
+migration_dependencies:
+  required:
+    - booking_agencies
+source:
+  plugin: csv
+  path: 'modules/custom/booking/migrations/csv/services.csv'
+  ids:
+    - id
+process:
+  name: name
+  vid:
+    plugin: default_value
+    default_value: services
+  field_agency/target_id:
+    plugin: migration_lookup
+    migration: booking_agencies
+    source: agency_id
+destination:
+  plugin: 'entity:taxonomy_term'

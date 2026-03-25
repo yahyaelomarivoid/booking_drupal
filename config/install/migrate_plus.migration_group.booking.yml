@@ -1,0 +1,10 @@
+id: booking
+label: 'Booking Module Migrations'
+description: 'Migrations for initial booking data.'
+source_type: 'CSV'
+shared_configuration:
+  source:
+    plugin: csv
+    header_row_count: 1
+    delimiter: ','
+    enclosure: '"'

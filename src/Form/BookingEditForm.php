@@ -188,7 +188,7 @@ class BookingEditForm extends FormBase
     ];
 
     // Service select
-    $service_options = $this->bookingService->getServiceOptions();
+    $service_options = $this->bookingService->getServiceOptions($selected_agency);
     $selected_service = $form_state->getValue('booking_type') ?? $booking->get('booking_type')->target_id;
 
     $form['service_wrapper'] = [

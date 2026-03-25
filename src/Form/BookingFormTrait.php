@@ -85,7 +85,8 @@ trait BookingFormTrait
   {
     try {
       $stored = $form_state->get('stored_values') ?: [];
-      $options = $this->bookingService->getServiceRichOptions();
+      $agencyId = $stored['agency_options'] ?? NULL;
+      $options = $this->bookingService->getServiceRichOptions($agencyId);
       $form['service_options'] = [
         '#type' => 'radios',
         '#title' => $this->t('Select a service'),

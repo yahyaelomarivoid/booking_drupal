@@ -1,0 +1,5 @@
+id,name,mail,pass,agency_id,service_ids
+1,John North,john.north@example.com,password,1,"1,3"
+2,Jane South,jane.south@example.com,password,2,"2,4"
+3,Bob North,bob.north@example.com,password,1,"1,3"
+4,Alice South,alice.south@example.com,password,2,"2,4"

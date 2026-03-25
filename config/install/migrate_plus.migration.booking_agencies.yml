@@ -1,0 +1,21 @@
+id: booking_agencies
+label: 'Import Booking Agencies'
+migration_group: booking
+migration_dependencies:
+  required: []
+source:
+  plugin: csv
+  path: 'modules/custom/booking/migrations/csv/agencies.csv'
+  ids:
+    - id
+process:
+  name: name
+  address: address
+  phone: phone
+  email: email
+  operating_hours: hours
+  active:
+    plugin: default_value
+    default_value: 1
+destination:
+  plugin: 'entity:agency'
