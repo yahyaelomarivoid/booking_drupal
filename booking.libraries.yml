@@ -22,3 +22,9 @@ booking_calendar:
     - core/jquery
     - core/once
     - booking/fullcalendar
+
+booking_dashboard:
+  version: VERSION
+  css:
+    theme:
+      css/booking-dashboard.css: {}

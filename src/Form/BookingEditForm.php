@@ -191,6 +191,7 @@ class BookingEditForm extends FormBase
     $service_options = $this->bookingService->getServiceOptions($selected_agency);
     $selected_service = $form_state->getValue('booking_type') ?? $booking->get('booking_type')->target_id;
 
+
     $form['service_wrapper'] = [
       '#type' => 'container',
       '#attributes' => ['id' => 'service-wrapper'],
@@ -232,11 +233,11 @@ class BookingEditForm extends FormBase
     ];
 
     $selected_date = $form_state->getValue('booking_date_selection') ?? explode('T', $booking->get('booking_date')->value)[0];
-    
+
     if ($selected_date && $selected_adviser) {
       $available_slots = $this->bookingService->getAvailableTimeSlots((int) $selected_adviser, $selected_date);
       $current_time = substr(explode('T', $booking->get('booking_date')->value)[1], 0, 5);
-      
+
       // If editing, the CURRENT slot should be included even if it's "busy" by the database
       if (!in_array($current_time, $available_slots)) {
         $available_slots[] = $current_time;
@@ -341,7 +342,7 @@ class BookingEditForm extends FormBase
       $form_state->setRebuild();
       return;
     }
-    
+
     $config = $this->configFactory->get('booking.settings');
     if (!($config->get('notifications_enabled') ?? TRUE)) {
       $this->messenger()->addError($this->t('The mail server is currently down please retry later'));
@@ -369,8 +370,7 @@ class BookingEditForm extends FormBase
     if ($booking && $booking->get('booking_secret_code')->value === $entered_code) {
       $form_state->set('verified', TRUE);
       $this->messenger()->addStatus($this->t('Code verified successfully.'));
-    }
-    else {
+    } else {
       $this->messenger()->addError($this->t('Invalid verification code. Please check your email.'));
     }
     $form_state->setRebuild();
@@ -398,7 +398,7 @@ class BookingEditForm extends FormBase
     try {
       /** @var \Drupal\booking\Entity\BookingEntity $booking */
       $booking = $this->entityTypeManager->getStorage('booking')->load($form_state->getValue('booking_id'));
-      
+
       if (!$booking) {
         $this->messenger()->addError($this->t('Booking not found.'));
         return;
@@ -415,7 +415,7 @@ class BookingEditForm extends FormBase
       $booking->set('booking_customer_name', $form_state->getValue('booking_customer_name'));
       $booking->set('booking_customer_email', $form_state->getValue('booking_customer_email'));
       $booking->set('booking_customer_phone', $form_state->getValue('booking_customer_phone'));
-      
+
       $violations = $booking->validate();
       if ($violations->count() > 0) {
         foreach ($violations as $violation) {
@@ -450,7 +450,7 @@ class BookingEditForm extends FormBase
 
       /** @var \Drupal\booking\Entity\BookingEntity $booking */
       $booking = $this->entityTypeManager->getStorage('booking')->load($stored_booking->id());
-      
+
       if (!$booking) {
         $this->logger('booking')->error('Cancel failed: booking_id @id not found.', ['@id' => $stored_booking->id()]);
         $this->messenger()->addError($this->t('Booking not found.'));
@@ -458,7 +458,7 @@ class BookingEditForm extends FormBase
       }
 
       $booking->set('booking_status', BookingStatus::CANCELLED->value);
-      
+
       // We only care about status transition violations for a cancellation.
       $violations = $booking->validate();
       $status_violations = [];
@@ -472,12 +472,12 @@ class BookingEditForm extends FormBase
       if (count($status_violations) > 0) {
         return;
       }
-      
+
       // Save directly, allowing the status change to persist even if other fields are technically invalid.
       $booking->save();
       $this->logger('booking')->notice('Booking @id cancelled successfully.', ['@id' => $booking->id()]);
       $this->messenger()->addStatus($this->t('Your booking has been cancelled.'));
-      
+
       $form_state->set('booking', NULL);
       $form_state->setRedirect('booking.mes-rdv');
     } catch (\Exception $e) {

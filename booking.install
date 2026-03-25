@@ -36,7 +36,7 @@ function booking_update_8001() {
       ->load('user.user.default');
     if ($display) {
       $display->setComponent('field_agency', [
-        'type' => 'entity_reference_autocomplete',
+        'type' => 'options_select',
         'weight' => 5,
       ])->save();
     }
@@ -76,7 +76,10 @@ function booking_update_8003() {
       
       \Drupal::service('entity_display.repository')
         ->getFormDisplay('user', 'user', 'default')
-        ->setComponent($id, ['weight' => 20])
+        ->setComponent($id, [
+          'type' => 'options_select',
+          'weight' => 20,
+        ])
         ->save();
     }
   }

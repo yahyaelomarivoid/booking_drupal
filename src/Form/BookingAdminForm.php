@@ -189,6 +189,15 @@ class BookingAdminForm extends ContentEntityForm
   public function save(array $form, FormStateInterface $form_state)
   {
     $status = parent::save($form, $form_state);
+    
+    // Redirect based on whether the user is an adviser or admin.
+    if (in_array('booking_adviser', \Drupal::currentUser()->getRoles())) {
+      $form_state->setRedirect('booking.mes-rdv');
+    }
+    else {
+      $form_state->setRedirect('entity.booking.collection');
+    }
+
     return $status;
   }
 

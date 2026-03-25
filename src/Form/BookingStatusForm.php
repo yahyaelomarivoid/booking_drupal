@@ -61,7 +61,12 @@ class BookingStatusForm extends ContentEntityForm
         '@status' => $booking->getStatusLabel(),
       ]));
 
-      $form_state->setRedirectUrl($this->entity->toUrl('collection'));
+      if (in_array('booking_adviser', \Drupal::currentUser()->getRoles())) {
+        $form_state->setRedirect('booking.mes-rdv');
+      }
+      else {
+        $form_state->setRedirect('entity.booking.collection');
+      }
 
       return $result;
     } catch (\Exception $e) {

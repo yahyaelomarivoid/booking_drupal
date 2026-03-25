@@ -22,10 +22,12 @@ booking.rdv.step:
 booking.mes-rdv:
   path: "/mes-rdv"
   defaults:
-    _form: '\Drupal\booking\Form\BookingEditForm'
-    _title: "Gérer mon rendez-vous"
+    _controller: '\Drupal\booking\Controller\BookingController::manageRendezVous'
+    _title: "Mes Rendez-vous"
+  options:
+    _admin_route: TRUE
   requirements:
-    _permission: "edit own booking"
+    _access: 'TRUE'
 
 # Admin: collection list
 entity.booking.collection:
@@ -37,15 +39,7 @@ entity.booking.collection:
     _permission: "access booking overview"
 
 # Admin: canonical/detail view
-entity.booking.canonical:
-  path: "/admin/structure/booking/{booking}"
-  defaults:
-    _entity_view: "booking"
-    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
-  requirements:
-    _permission: "access booking overview"
-    booking: \d+
-
+e
 # Admin: full entity edit form
 entity.booking.edit_form:
   path: "/admin/structure/booking/{booking}/edit"
@@ -53,7 +47,7 @@ entity.booking.edit_form:
     _entity_form: "booking.default"
     _title: "Edit Booking"
   requirements:
-    _permission: "edit booking entity"
+    _entity_access: "booking.update"
     booking: \d+
 
 # Admin: status-only form
@@ -63,7 +57,7 @@ entity.booking.status_form:
     _entity_form: "booking.status"
     _title: "Update Booking Status"
   requirements:
-    _permission: "edit booking entity"
+    _entity_access: "booking.update"
     booking: \d+
 
 # Admin: delete confirmation form
@@ -73,7 +67,7 @@ entity.booking.delete_form:
     _entity_form: "booking.delete"
     _title: "Delete Booking"
   requirements:
-    _permission: "delete booking entity"
+    _entity_access: "booking.delete"
     booking: \d+
 
 # Admin: export csv data
@@ -93,3 +87,5 @@ booking.settings:
     _title: 'Booking Settings'
   requirements:
     _permission: 'administer booking settings'
+
+

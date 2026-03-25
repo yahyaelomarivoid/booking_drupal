@@ -18,21 +18,48 @@ class BookingAccessControlHandler extends EntityAccessControlHandler {
   protected function checkAccess(EntityInterface $entity, $operation, AccountInterface $account) {
     /** @var \Drupal\booking\Entity\BookingEntity $entity */
 
-    switch ($operation) {
-      case 'view':
-        return AccessResult::allowedIfHasPermission($account, 'access booking overview');
-
-      case 'update':
-        // Allow if admin OR if the user has the 'edit own booking' permission.
-        // (Note: The actual reference check is handled in the BookingEditForm).
-        return AccessResult::allowedIfHasPermission($account, 'edit booking entity')
-          ->orIf(AccessResult::allowedIfHasPermission($account, 'edit own booking'));
-
-      case 'delete':
-        return AccessResult::allowedIfHasPermission($account, 'delete booking entity');
+    // 1. Super-admin bypass (users who can manage everything).
+    if ($account->hasPermission('administer booking settings') || $account->hasPermission('administer booking')) {
+      return AccessResult::allowed();
     }
 
-    // Unknown operation, no opinion.
+    $is_assigned_adviser = ($entity->get('booking_adviser')->target_id == $account->id());
+
+    switch ($operation) {
+      case 'view':
+        // Allow if they have global view permission.
+        if ($account->hasPermission('access booking overview')) {
+          return AccessResult::allowed();
+        }
+        // Allow if they are the assigned adviser for THIS specific booking.
+        return AccessResult::allowedIfHasPermission($account, 'view own managed bookings')
+          ->andIf(AccessResult::allowedIf($is_assigned_adviser))
+          ->addCacheableDependency($entity);
+
+      case 'update':
+        // Allow if they have global edit permission.
+        if ($account->hasPermission('edit booking entity')) {
+          return AccessResult::allowed();
+        }
+        // Allow if they are the assigned adviser AND have permission.
+        if ($account->hasPermission('view own managed bookings') && $is_assigned_adviser) {
+          return AccessResult::allowed();
+        }
+        // Special case for customers using the verification code (usually handled in the form, 
+        // but we allow the permission check here for API consistency).
+        return AccessResult::allowedIfHasPermission($account, 'edit own booking');
+
+      case 'delete':
+        // Allow if global delete permission.
+        if ($account->hasPermission('delete booking entity')) {
+          return AccessResult::allowed();
+        }
+        // Advisers can "delete" (cancel) their own bookings if they have permission.
+        return AccessResult::allowedIfHasPermission($account, 'view own managed bookings')
+          ->andIf(AccessResult::allowedIf($is_assigned_adviser))
+          ->addCacheableDependency($entity);
+    }
+
     return AccessResult::neutral();
   }
 

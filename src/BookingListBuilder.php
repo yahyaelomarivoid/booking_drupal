@@ -21,17 +21,28 @@ class BookingListBuilder extends EntityListBuilder
 
   public function render()
   {
-    $build['filter_form'] = \Drupal::formBuilder()->getForm('\Drupal\booking\Form\BookingFilterForm');
-    $build['export_button'] = [
+    $build['dashboard_container'] = [
+      '#type' => 'container',
+      '#attributes' => ['class' => ['booking-dashboard-header']],
+    ];
+
+    $build['dashboard_container']['filter_form'] = \Drupal::formBuilder()->getForm('\Drupal\booking\Form\BookingFilterForm');
+    
+    $build['dashboard_container']['export_button'] = [
       '#type' => 'link',
-      '#title' => $this->t('Export'),
+      '#title' => $this->t('Download CSV Export'),
       '#url' => Url::fromRoute('booking.export'),
       '#attributes' => [
-        'class' => ['button', 'button--primary'],
+        'class' => ['button', 'button--primary', 'export-button'],
+        'style' => 'margin-bottom: 20px; display: inline-block;',
       ],
     ];
 
-    $build += parent::render();
+    $build['table'] = parent::render();
+    
+    // Attach the dedicated dashboard library
+    $build['#attached']['library'][] = 'booking/booking_dashboard';
+
     return $build;
   }
 
@@ -76,13 +87,21 @@ class BookingListBuilder extends EntityListBuilder
       ),
     ];
     $row['customer'] = (string) $entity->get('booking_customer_name')->value;
-    $row['date'] = (string) $entity->get('booking_date')->value;
+    
+    // Format the date for human readability
+    $date_value = $entity->get('booking_date')->value;
+    if ($date_value) {
+      $date = new \DateTime($date_value);
+      $row['date'] = $date->format('d/m/Y - H:i');
+    } else {
+      $row['date'] = $this->t('N/A');
+    }
 
     // Status as a badge-like markup
     $status = $entity->get('booking_status')->value;
     $row['status'] = [
       'data' => [
-        '#markup' => '<span class="booking-status booking-status--' . htmlspecialchars($status) . '">'
+        '#markup' => '<span class="booking-status booking-status--' . strtolower(htmlspecialchars($status)) . '">'
           . htmlspecialchars($entity->getStatusLabel()) . '</span>',
       ],
     ];

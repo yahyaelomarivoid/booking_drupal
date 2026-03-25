@@ -36,6 +36,9 @@ class BookingSoftDeleteForm extends ContentEntityConfirmFormBase
    */
   public function getCancelUrl()
   {
+    if (in_array('booking_adviser', \Drupal::currentUser()->getRoles())) {
+      return Url::fromRoute('booking.mes-rdv');
+    }
     return new Url('entity.booking.collection');
   }
 

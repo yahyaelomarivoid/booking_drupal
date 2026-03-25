@@ -35,3 +35,7 @@ create booking:
 edit own booking:
   title: 'Edit own booking'
   description: 'Access the self-service edit form using a reference and verification code.'
+
+view own managed bookings:
+  title: 'View own managed bookings'
+  description: 'Allows advisers to see the list of appointments assigned specifically to them.'
