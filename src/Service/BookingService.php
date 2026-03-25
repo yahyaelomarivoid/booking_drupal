@@ -185,7 +185,8 @@ class BookingService
       $storage = $this->entityTypeManager->getStorage('user');
       $query = $storage->getQuery()
         ->accessCheck(FALSE)
-        ->condition('status', 1);
+        ->condition('status', 1)
+        ->condition('roles', 'booking_adviser');
 
       if ($agencyId) {
         $query->condition('field_agency', $agencyId);
@@ -265,7 +266,8 @@ class BookingService
       $storage = $this->entityTypeManager->getStorage('user');
       $query = $storage->getQuery()
         ->accessCheck(FALSE)
-        ->condition('status', 1);
+        ->condition('status', 1)
+        ->condition('roles', 'booking_adviser');
 
       if ($agencyId) {
         $query->condition('field_agency', $agencyId);
